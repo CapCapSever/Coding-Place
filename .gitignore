@@ -1,0 +1,31 @@
+# Compiled binaries & executables (Windows & Linux)
+*.exe
+*.out
+*.app
+*.bin
+
+# Compiled Object files & libraries
+*.o
+*.obj
+*.so
+*.dylib
+*.a
+
+# Debugging symbols
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Build directories (CMake, Make, v.v.)
+build/
+bin/
+obj/
+out/
+cmake-build-*/
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+*~
