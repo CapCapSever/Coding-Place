@@ -39,8 +39,10 @@ void insertTail(Node*& head, Node*& tail, Node*& target){
 int main(){
     int n;
     LinkedList ma;
-    Node *fast, *slow;
     cin >> n;
+
+    if(n==0){cout << 0; return 0;}
+
     for (int i = 0; i < n; ++i){
         int vtemp;
         cin >> vtemp;
@@ -48,6 +50,11 @@ int main(){
         insertTail(ma.head, ma.tail, newNode);
     }
 
-    
+    Node *fast = ma.head, *slow = ma.head;
+    while(fast != nullptr && fast-> next != nullptr){
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    cout << slow->value << endl;
     return 0;
 }
