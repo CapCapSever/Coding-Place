@@ -55,6 +55,7 @@ Roots solveQuadratic(double a, double b, double c) {
         return {1, temp, temp};
     }
     double delta = b*b - 4*a*c;
+    //cout << "delta " << delta << endl;
     //Avoid delta = -0.0 for better squareroot.
     if(std::abs(delta) <= EPS) delta = 0.0;
     if(delta < -EPS) return {0,0,0};
@@ -188,6 +189,7 @@ bool hasDupSort(vector<int> a) {          // nhan ban sao -> duoc phep sap xep
 }
 bool hasDupHash(const vector<int>& a) {
     // TODO: viet code cua ban o day
+    //unordered is a hash table, while set is a red-black tree
     unordered_set<int> seen;
     for (int x : a) {
         if (seen.find(x) != seen.end()) return true;
