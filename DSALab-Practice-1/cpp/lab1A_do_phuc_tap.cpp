@@ -55,7 +55,7 @@ Roots solveQuadratic(double a, double b, double c) {
         return {1, temp, temp};
     }
     double delta = b*b - 4*a*c;
-    //cout << "delta " << delta << endl;
+    //cout << "delta " << setprecision(20) << delta << endl;
     //Avoid delta = -0.0 for better squareroot.
     if(std::abs(delta) <= EPS) delta = 0.0;
     if(delta < -EPS) return {0,0,0};
