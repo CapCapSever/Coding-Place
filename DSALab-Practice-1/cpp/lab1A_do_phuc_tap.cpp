@@ -49,14 +49,18 @@ Roots solveQuadratic(double a, double b, double c) {
     if(std::abs(a) <= EPS){
         if(std::abs(b) <= EPS){
             if(std::abs(c) <= EPS) return {-1, 0, 0};
-            return {1, 0, 0};
+            return {0, 0, 0};
         }
-        return {1, -c/b, 0};
+        double temp = -c/b;
+        return {1, temp, temp};
     }
     double delta = b*b - 4*a*c;
+    //Avoid delta = -0.0 for better squareroot.
+    if(std::abs(delta) <= EPS) delta = 0.0;
     if(delta < -EPS) return {0,0,0};
     if(std::abs(delta) <= EPS){
-        return{1, -b/(2*a), 0};
+        double temp = -b/(2*a);
+        return{1, temp, temp};
     }
     else if(delta > EPS){
         double x1 = (-b - sqrt(delta)) / (2*a);
@@ -81,51 +85,76 @@ long long ceilLog2(long long n) { long long k = 0, p = 1; while (p < n) { p <<= 
 long long countF1(long long n) {
     long long cnt = 0;
     // TODO: viet code cua ban o day
+    for (long long i = 0; i < n; i++) {
+        cnt++;
+    }
     return cnt;
 }
 // F2: for i = 0..n-1: for j = 0..n-1:          cnt++
 long long countF2(long long n) {
     long long cnt = 0;
     // TODO: viet code cua ban o day
+    for (long long i = 0; i < n; i++) {
+        for (long long j = 0; j < n; j++) {
+            cnt++;
+        }
+    }
     return cnt;
 }
 // F3: for i = 0..n-1: for j = i+1..n-1:        cnt++
 long long countF3(long long n) {
     long long cnt = 0;
     // TODO: viet code cua ban o day
+    for (long long i = 0; i < n; i++) {
+        for (long long j = i + 1; j < n; j++) {
+            cnt++;
+        }
+    }
     return cnt;
 }
 // F4: i = 1; while (i < n) { cnt++; i = i * 2; }
 long long countF4(long long n) {
     long long cnt = 0;
     // TODO: viet code cua ban o day
+    long long i = 1;
+    while (i < n) {
+        cnt++;
+        i = i * 2;
+    }
     return cnt;
 }
 // F5: for i = 0..n-1: { j = 1; while (j < n) { cnt++; j = j * 2; } }
 long long countF5(long long n) {
     long long cnt = 0;
     // TODO: viet code cua ban o day
+    for (long long i = 0; i < n; i++) {
+        long long j = 1;
+        while (j < n) {
+            cnt++;
+            j = j * 2;
+        }
+    }
     return cnt;
 }
 long long formulaF1(long long n) {
     // TODO: viet code cua ban o day
-    return 0;
+    return n;
 }
 long long formulaF2(long long n) {
     // TODO: viet code cua ban o day
-    return 0;
+    return n * n;
 }
 long long formulaF3(long long n) {
     // TODO: viet code cua ban o day
-    return 0;
+    return n * (n - 1) / 2;
 }
 long long formulaF4(long long n) {
     // TODO: viet code cua ban o day
-    return 0;
+    return ceilLog2(n);
 }
 long long formulaF5(long long n) {
     // TODO: viet code cua ban o day
-    return 0;
+    return n * ceilLog2(n);
 }
 
 // =====================================================================
@@ -140,14 +169,30 @@ long long pairComparisons = 0;   // A phai tang bien nay moi lan so sanh a[i]==a
 
 bool hasDupBrute(const vector<int>& a) {
     // TODO: viet code cua ban o day
+    int n = a.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            pairComparisons++;
+            if (a[i] == a[j]) return true;
+        }
+    }
     return false;
 }
 bool hasDupSort(vector<int> a) {          // nhan ban sao -> duoc phep sap xep
     // TODO: viet code cua ban o day
+    sort(a.begin(), a.end());
+    for (size_t i = 1; i < a.size(); i++) {
+        if (a[i] == a[i - 1]) return true;
+    }
     return false;
 }
 bool hasDupHash(const vector<int>& a) {
     // TODO: viet code cua ban o day
+    unordered_set<int> seen;
+    for (int x : a) {
+        if (seen.find(x) != seen.end()) return true;
+        seen.insert(x);
+    }
     return false;
 }
 

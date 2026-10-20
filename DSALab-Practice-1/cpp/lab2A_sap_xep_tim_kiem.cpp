@@ -46,15 +46,61 @@ bool TRACE = false;   // true -> in mang sau moi luot (pass) cua vong ngoai
 // Selection: comps++ moi lan so sanh a[j] < a[minPos]; moves++ khi swap (chi khi minPos != i)
 void selectionSort(vector<int>& a, Stats& st) {
     // TODO: viet code cua ban o day
+    int n = a.size();
+    for (int i = 0; i < n - 1; i++) {
+        int minPos = i;
+        for (int j = i + 1; j < n; j++) {
+            st.comps++;
+            if (a[j] < a[minPos]) {
+                minPos = j;
+            }
+        }
+        if (minPos != i) {
+            swap(a[i], a[minPos]);
+            st.moves++;
+        }
+        if (TRACE) { cout << "  "; printArr(a); }
+    }
 }
 // Insertion: key = a[i]; dich cac phan tu > key sang phai.
 //   comps++ moi lan so sanh a[j] > key (chi khi j >= 0); moves++ moi lan dich a[j+1] = a[j]
 void insertionSort(vector<int>& a, Stats& st) {
     // TODO: viet code cua ban o day
+    int n = a.size();
+    for (int i = 1; i < n; i++) {
+        int key = a[i];
+        int j = i - 1;
+        while (j >= 0) {
+            st.comps++;
+            if (a[j] > key) {
+                a[j + 1] = a[j];
+                st.moves++;
+                j--;
+            } else {
+                break;
+            }
+        }
+        a[j + 1] = key;
+        if (TRACE) { cout << "  "; printArr(a); }
+    }
 }
 // Bubble (co co 'swapped' de dung som): comps++ moi lan so sanh a[j] > a[j+1]; moves++ moi lan swap
 void bubbleSort(vector<int>& a, Stats& st) {
     // TODO: viet code cua ban o day
+    int n = a.size();
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+        for (int j = 0; j < n - 1 - i; j++) {
+            st.comps++;
+            if (a[j] > a[j + 1]) {
+                swap(a[j], a[j + 1]);
+                st.moves++;
+                swapped = true;
+            }
+        }
+        if (TRACE) { cout << "  "; printArr(a); }
+        if (!swapped) break;
+    }
 }
 
 // =====================================================================
@@ -63,16 +109,55 @@ void bubbleSort(vector<int>& a, Stats& st) {
 // =====================================================================
 int partitionLomuto(vector<int>& a, int lo, int hi, Stats& st) {
     // TODO: viet code cua ban o day
-    return lo;
+    int pivot = a[hi];
+    int i = lo - 1;
+    for (int j = lo; j < hi; j++) {
+        st.comps++;
+        if (a[j] <= pivot) {
+            i++;
+            swap(a[i], a[j]);
+            st.moves++;
+        }
+    }
+    swap(a[i + 1], a[hi]);
+    st.moves++;
+    return i + 1;
 }
 void quickSort(vector<int>& a, int lo, int hi, Stats& st) {
     // TODO: viet code cua ban o day
+    if (lo < hi) {
+        int p = partitionLomuto(a, lo, hi, st);
+        quickSort(a, lo, p - 1, st);
+        quickSort(a, p + 1, hi, st);
+    }
 }
 void mergeRuns(vector<int>& a, int lo, int mid, int hi, Stats& st) {
     // TODO: viet code cua ban o day
+    vector<int> temp;
+    temp.reserve(hi - lo + 1);
+    int i = lo, j = mid + 1;
+    while (i <= mid && j <= hi) {
+        st.comps++;
+        if (a[i] <= a[j]) {
+            temp.push_back(a[i++]);
+        } else {
+            temp.push_back(a[j++]);
+        }
+    }
+    while (i <= mid) temp.push_back(a[i++]);
+    while (j <= hi) temp.push_back(a[j++]);
+    for (int k = 0; k < (int)temp.size(); k++) {
+        a[lo + k] = temp[k];
+    }
 }
 void mergeSort(vector<int>& a, int lo, int hi, Stats& st) {
     // TODO: viet code cua ban o day
+    if (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        mergeSort(a, lo, mid, st);
+        mergeSort(a, mid + 1, hi, st);
+        mergeRuns(a, lo, mid, hi, st);
+    }
 }
 
 // =====================================================================
@@ -81,6 +166,21 @@ void mergeSort(vector<int>& a, int lo, int hi, Stats& st) {
 // =====================================================================
 int binarySearchTrace(const vector<int>& a, int x, bool trace) {
     // TODO: viet code cua ban o day
+    int lo = 0, hi = (int)a.size() - 1;
+    int step = 1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (trace) {
+            cout << "  step " << step++ << ": lo=" << lo << " hi=" << hi << " mid=" << mid << " a[mid]=" << a[mid] << "\n";
+        }
+        if (a[mid] == x) {
+            return mid;
+        } else if (a[mid] < x) {
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
     return -1;
 }
 
@@ -95,10 +195,18 @@ struct ChainingTable {
     explicit ChainingTable(int m_) : m(m_), slot(m_) {}
     void insert(int k) {
         // TODO: viet code cua ban o day
+        int idx = (k % m + m) % m;
+        slot[idx].push_front(k);
     }
     int searchProbes(int k) const {          // so phan tu da xet trong chuoi
         // TODO: viet code cua ban o day
-        return 0;
+        int idx = (k % m + m) % m;
+        int probes = 0;
+        for (int v : slot[idx]) {
+            probes++;
+            if (v == k) return probes;
+        }
+        return probes;
     }
     void print() const {
         for (int i = 0; i < m; i++) {
@@ -113,11 +221,26 @@ struct LinearProbingTable {
     explicit LinearProbingTable(int m_) : m(m_), t(m_, -1) {}
     bool insert(int k) {                     // false neu bang day
         // TODO: viet code cua ban o day
+        for (int step = 0; step < m; step++) {
+            int cur = ((k % m + m) % m + step) % m;
+            if (t[cur] == -1) {
+                t[cur] = k;
+                return true;
+            }
+        }
         return false;
     }
     int searchProbes(int k) const {
         // TODO: viet code cua ban o day
-        return 0;
+        int probes = 0;
+        for (int step = 0; step < m; step++) {
+            int cur = ((k % m + m) % m + step) % m;
+            probes++;
+            if (t[cur] == k || t[cur] == -1) {
+                return probes;
+            }
+        }
+        return probes;
     }
     void print() const {
         cout << "  ";
