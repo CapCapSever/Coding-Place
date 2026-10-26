@@ -1,0 +1,27 @@
+===== 1B.1: Tim kiem tuyen tinh =====
+Tot nhat  (x = a[0])        : comps = 1  pos = 0
+Xau nhat  (x khong co)      : comps = 1000
+Trung binh (tim lan luot moi phan tu): tong = 500500  TB = 500.500  ly thuyet (n+1)/2 = 500.500  [OK]
+
+===== 1B.2: Luy thua mod 1e9+7 =====
+3^10 mod p = 59049   naive: 10 phep nhan,  fast: 6 phep nhan  [OK]
+3^1000 mod p = 56888193   naive: 1000 phep nhan,  fast: 16 phep nhan  [OK]
+3^1000000 mod p = 64935414   naive: 1000000 phep nhan,  fast: 27 phep nhan  [OK]
+
+===== 1B.3: Fibonacci =====
+   n          F(n)    calls(rec) calls(memo)    rec (ms)
+  10            55           177          19       0.020  [OK]
+  20          6765         21891          39       1.952  [OK]
+  25         75025        242785          49      22.065  [OK]
+  30        832040       2692537          59     234.040  [OK]
+  32       2178309       7049155          63     588.369  [OK]
+F(90) = 2880067194370816120  (fib_rec(90) se chay hang tram nam!)
+
+===== 1B.4: 3-SUM =====
+     n  so bo ba    n^3 (ms)  n^2logn (ms)    n^2 (ms)     khop?
+   200       236      83.028         2.965       1.104      [OK]
+   400      1037     654.689        17.479       5.704      [OK]   b ~ n^2.979 | n^2.559 | n^2.370
+   800      3935      -1.000        71.052      22.340      [OK]   b ~ n^2.023 | n^1.970
+  1600     16057      -1.000       307.699      98.272      [OK]   b ~ n^2.115 | n^2.137
+  3200     65151      -1.000      1290.382     404.591      [OK]   b ~ n^2.068 | n^2.042
+(b = log2( T(2n) / T(n) ) la so mu uoc luong cua T(n) ~ n^b)

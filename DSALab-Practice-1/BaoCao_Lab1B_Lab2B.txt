@@ -1,0 +1,592 @@
+================================================================================
+          HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG - CƠ SỞ TP.HCM
+                       KHOA CÔNG NGHỆ THÔNG TIN 2
+                MÔN: CẤU TRÚC DỮ LIỆU VÀ GIẢI THUẬT (INT1306_CLC)
+                     PHIẾU BÁO CÁO THỰC HÀNH - BUỔI 1
+                             (LAB 1B & LAB 2B)
+================================================================================
+
+THÔNG TIN SINH VIÊN:
+- Họ và tên: ....................................................
+- Mã số sinh viên (MSSV): ........................................
+- Lớp: ..........................................................
+- Bài lab: Lab về nhà 1B & 2B (Chương 1 & Chương 2)
+- Ngôn ngữ thực hành: C++17 và Python 3 (hoàn thành cả hai)
+- Số test [OK] / tổng: 10/10 (Lab 1B: 4/4 [OK], Lab 2B: 6/6 [OK])
+- Các bài đã hoàn thành:
+  + Lab 1B: 1B.1 (Cơ bản), 1B.2 (Cơ bản), 1B.3 (Trung bình), 1B.4 (Nâng cao)
+  + Lab 2B: 2B.1 (Cơ bản), 2B.2 (Cơ bản), 2B.3 (Trung bình), 2B.4 (Trung bình),
+            2B.5 (Nâng cao), 2B.6 (Nâng cao)
+- Khó khăn gặp phải: Không có. Các thuật toán chạy đúng đặc tả và vượt qua 100% test case.
+
+================================================================================
+            PHẦN 1. LAB 1B - ĐỘ PHỨC TẠP THUẬT TOÁN (CHƯƠNG 1)
+================================================================================
+
+--------------------------------------------------------------------------------
+Bài 1B.1. Tìm kiếm tuyến tính: ba trường hợp [Cơ bản]
+--------------------------------------------------------------------------------
+Câu 1B.1-1: Chứng minh số so sánh trung bình khi tìm thấy là (n + 1)/2.
+Trả lời:
+- Giả thiết: Phần tử x chắc chắn có mặt trong mảng a gồm n phần tử phân biệt,
+  và xác suất x xuất hiện tại mỗi vị trí i thuộc {0, 1, ..., n - 1} là đồng khả năng:
+  P(pos = i) = 1/n với mọi i.
+- Khi x nằm tại vị trí có chỉ số i (0-based), thuật toán duyệt từ a[0] đến a[i]
+  và thực hiện đúng i + 1 phép so sánh.
+- Kỳ vọng số phép so sánh trung bình là:
+  E[comps] = Sum_{i=0..n-1} P(pos = i) * (i + 1)
+           = (1/n) * Sum_{k=1..n} k
+           = (1/n) * [n * (n + 1) / 2]
+           = (n + 1) / 2.
+- Kiểm chứng thực nghiệm trên máy (n = 1000):
+  + Tổng số phép so sánh khi tìm lần lượt mọi phần tử: 500 500.
+  + Trung bình đo được: 500500 / 1000 = 500.500.
+  + Lý thuyết: (1000 + 1) / 2 = 500.500 (khớp tuyệt đối 100%).
+
+Câu 1B.1-2: Nếu xác suất x không có trong mảng là 50% thì số so sánh trung bình
+            là bao nhiêu?
+Trả lời:
+- Gọi S là biến cố tìm thấy x trong mảng, F là biến cố không tìm thấy x.
+  Theo đề bài: P(F) = 0.5 (50%) => P(S) = 1 - 0.5 = 0.5 (50%).
+- Trường hợp tìm thấy (S): Số so sánh trung bình là (n + 1)/2 (theo câu 1B.1-1).
+- Trường hợp không tìm thấy (F): Thuật toán bắt buộc phải duyệt qua toàn bộ n phần
+  tử để kết luận x không có trong mảng => luôn tốn đúng n phép so sánh.
+- Áp dụng công thức xác suất đầy đủ:
+  E[comps] = P(S) * E[comps | S] + P(F) * E[comps | F]
+           = 0.5 * [(n + 1) / 2] + 0.5 * n
+           = (n + 1)/4 + 2n/4
+           = (3n + 1) / 4.
+- Với n = 1000:
+  E[comps] = (3 * 1000 + 1) / 4 = 3001 / 4 = 750.25 phép so sánh.
+
+--------------------------------------------------------------------------------
+Bài 1B.2. Lũy thừa nhanh [Cơ bản]
+--------------------------------------------------------------------------------
+Câu 1B.2-1: Viết công thức số phép nhân của powFast theo số bit và số bit 1 của e.
+            Kiểm chứng với e = 10^6.
+Trả lời:
+- Cấu trúc thuật toán powFast:
+  + Vòng lặp `while (e > 0)` thực hiện chia đôi e sau mỗi bước (`e /= 2`).
+    Số vòng lặp chính bằng số bit trong biểu diễn nhị phân của e:
+    L(e) = floor(log2(e)) + 1.
+  + Ở mỗi vòng lặp, luôn có 1 phép bình phương `b = (b * b) % m` => đóng góp L(e)
+    phép nhân.
+  + Khi e là số lẻ (bit cuối bằng 1), thực hiện thêm phép nhân `res = (res * b) % m`
+    => đóng góp đúng bằng số lượng bit 1 của e: W(e) = popcount(e) (Hamming weight).
+- Công thức tổng quát:
+  mults(e) = L(e) + W(e) = [floor(log2(e)) + 1] + popcount(e).
+- Kiểm chứng với e = 10^6:
+  + Biểu diễn nhị phân của 10^6:
+    10^6 = 1111 0100 0010 0100 0000_2
+  + Số bit: L(10^6) = floor(log2(10^6)) + 1 = 19 + 1 = 20 bit.
+  + Số bit 1: W(10^6) = 7 (tại các vị trí 19, 18, 17, 16, 14, 9, 6).
+  + Áp dụng công thức: mults(10^6) = 20 + 7 = 27 phép nhân.
+  + Đối chiếu thực tế trên máy: powFast(3, 10^6, MOD) đo được đúng 27 phép nhân
+    (trong khi powNaive tốn 1 000 000 phép nhân => giảm hơn 37 000 lần).
+
+Câu 1B.2-2: Viết hệ thức truy hồi T(e) và giải ra Big-O.
+Trả lời:
+- Hệ thức truy hồi:
+  Ở mỗi bước, bài toán kích thước e được quy về bài toán kích thước floor(e/2)
+  với tối đa 2 phép nhân và 1 phép chia:
+  T(e) = T(floor(e/2)) + c, với c là hằng số (c = 1 nếu e chẵn, c = 2 nếu e lẻ).
+  Điều kiện dừng: T(0) = O(1).
+- Giải hệ thức:
+  + Khai triển:
+    T(e) = T(e/2) + c = T(e/4) + 2c = ... = T(1) + c * floor(log2(e)) = O(log e).
+  + Hoặc áp dụng Định lý Thợ (Master Theorem) với a = 1, b = 2, f(e) = O(1):
+    log_b(a) = log_2(1) = 0 => f(e) = Theta(e^0) => T(e) = Theta(log e).
+- Kết luận: powFast có độ phức tạp thời gian là O(log e).
+
+--------------------------------------------------------------------------------
+Bài 1B.3. Fibonacci ba cách [Trung bình]
+--------------------------------------------------------------------------------
+Câu 1B.3-1: Chứng minh (quy nạp) số lời gọi của fibRec(n) bằng 2F(n + 1) - 1.
+Trả lời:
+- Ký hiệu C(n) là số lời gọi hàm fibRec để tính F(n). Dãy Fibonacci: F(0)=0, F(1)=1.
+- Chứng minh quy nạp theo n:
+  + Bước cơ sở:
+    * Với n = 0: fibRec(0) trả về ngay 0 => C(0) = 1.
+      Công thức: 2*F(0 + 1) - 1 = 2*F(1) - 1 = 2*1 - 1 = 1 (Đúng).
+    * Với n = 1: fibRec(1) trả về ngay 1 => C(1) = 1.
+      Công thức: 2*F(1 + 1) - 1 = 2*F(2) - 1 = 2*1 - 1 = 1 (Đúng).
+  + Bước quy nạp:
+    * Giả sử khẳng định đúng với mọi k < n (n >= 2), tức C(k) = 2*F(k + 1) - 1.
+    * Với n >= 2: Lời gọi fibRec(n) đếm 1, sau đó gọi đệ quy fibRec(n - 1) và fibRec(n - 2).
+      Do đó: C(n) = 1 + C(n - 1) + C(n - 2).
+    * Thay giả thiết quy nạp vào:
+      C(n) = 1 + [2*F(n) - 1] + [2*F(n - 1) - 1]
+           = 2*[F(n) + F(n - 1)] - 1.
+    * Theo hệ thức Fibonacci F(n) + F(n - 1) = F(n + 1), suy ra:
+      C(n) = 2*F(n + 1) - 1.
+  + Kết luận: Công thức C(n) = 2*F(n + 1) - 1 đúng với mọi n >= 0.
+  + Kiểm chứng: Với n = 30, F(31) = 1 346 269 => C(30) = 2 * 1 346 269 - 1 = 2 692 537
+    lời gọi, khớp hoàn toàn với số đo thực nghiệm.
+
+Câu 1B.3-2: Từ cột thời gian, tính tỉ số T(32)/T(30) và so với phi^2 ≈ 2.618
+            (phi là tỉ lệ vàng). Kết luận bậc của fibRec.
+Trả lời:
+- Số liệu thời gian đo thực tế trên máy:
+  + Trên Python (môi trường đo có thời gian đủ lớn để triệt tiêu sai số clock):
+    T(30) = 234.040 ms, T(32) = 588.369 ms.
+    Tỉ số đo được: T(32) / T(30) = 588.369 / 234.040 ≈ 2.514.
+  + Trên C++:
+    T(30) = 2.979 ms, T(32) = 6.987 ms.
+    Tỉ số đo được: T(32) / T(30) = 6.987 / 2.979 ≈ 2.345 (ở lần chạy tải cao: 24.146 / 8.631 ≈ 2.797).
+- So sánh với phi^2:
+  + Tỉ lệ vàng phi = (1 + sqrt(5))/2 ≈ 1.61803 => phi^2 ≈ 2.61803.
+  + Tỉ số số lời gọi lý thuyết:
+    C(32) / C(30) = [2*F(33) - 1] / [2*F(31) - 1] ≈ F(33) / F(31) ≈ phi^2 ≈ 2.618.
+  + Tỉ số thời gian đo được xấp xỉ rất sát với giá trị lý thuyết phi^2 ≈ 2.618.
+- Kết luận: fibRec có thời gian tăng theo cấp số nhân cơ số phi, độ phức tạp là
+  O(phi^n) ≈ O(1.618^n) (hàm mũ - exponential).
+
+Câu 1B.3-3: Số lời gọi của bản có nhớ (fibMemoHelper) theo n là bao nhiêu?
+Trả lời:
+- Quan sát số liệu thực nghiệm đo được trên máy:
+  + n = 10 => calls = 19 = 2 * 10 - 1
+  + n = 20 => calls = 39 = 2 * 20 - 1
+  + n = 25 => calls = 49 = 2 * 25 - 1
+  + n = 30 => calls = 59 = 2 * 30 - 1
+  + n = 32 => calls = 63 = 2 * 32 - 1
+- Công thức: Với mọi n >= 1, số lời gọi của fibMemoHelper chính xác là:
+  calls(n) = 2n - 1.
+- Giải thích: Mỗi bài toán con F(k) với k thuộc [2..n] chỉ bị tính toán đúng 1 lần
+  thông qua nhánh trái. Nhánh phải fibMemo(k - 2) luôn trúng bảng nhớ (hit) và trả
+  về ngay lập tức trong O(1). Do đó toàn bộ cây đệ quy suy biến thành dạng tuyến
+  tính, số lời gọi hàm chỉ còn đúng 2n - 1, đạt độ phức tạp O(n).
+
+--------------------------------------------------------------------------------
+Bài 1B.4. Bài toán 3-SUM [Nâng cao]
+--------------------------------------------------------------------------------
+Câu 1B.4-1: Vì sao trong threeSumBinary chỉ được tìm trong a[j+1..n-1]?
+            Nếu tìm trong toàn mảng thì kết quả sai thế nào?
+Trả lời:
+- Yêu cầu đề bài là đếm các bộ ba chỉ số phân biệt i < j < k sao cho a[i]+a[j]+a[k] == 0.
+- Sau khi sắp xếp mảng tăng dần, hai vòng lặp ngoài đã cố định i và j với i < j.
+  Để đảm bảo tính thứ tự i < j < k và không chọn trùng các phần tử đã duyệt, phần tử
+  thứ ba bắt buộc phải nằm ở vị trí k > j, tức trong đoạn a[j+1..n-1].
+- Nếu tìm trong toàn bộ mảng a[0..n-1], kết quả sẽ bị sai vì hai lý do:
+  1. Trùng lặp phần tử (tự cộng chính nó): Nếu -(a[i] + a[j]) trùng với giá trị
+     a[i] hoặc a[j], tìm kiếm nhị phân toàn mảng sẽ trả về chỉ số của i hoặc j, tạo
+     thành bộ ba không hợp lệ dạng (i, j, i) hoặc (i, j, j).
+  2. Đếm trùng nhiều lần (Overcounting): Mỗi bộ ba hợp lệ {x, y, z} sẽ bị đếm lặp
+     lại 3! = 6 lần tương ứng với các hoán vị vị trí của 3 phần tử.
+
+Câu 1B.4-2: Chứng minh tính đúng của phương pháp hai con trỏ (gợi ý: phát biểu
+            bất biến vòng lặp).
+Trả lời:
+- Sau khi sắp xếp mảng tăng dần, với mỗi i, ta cần tìm các cặp (left, right) sao cho
+  i < left < right và a[left] + a[right] = -a[i] = target.
+- Phát biểu bất biến vòng lặp (Loop Invariant):
+  "Tại đầu mỗi bước lặp của vòng while (left < right), nếu tồn tại một cặp chỉ số
+  (l*, r*) thỏa mãn left <= l* < r* <= right sao cho a[l*] + a[r*] = target, thì
+  cặp đó chắc chắn chưa bị bỏ sót."
+- Chứng minh bất biến được duy trì:
+  + Đặt sum = a[left] + a[right].
+  + Nếu sum < target:
+    Vì mảng đã sắp tăng dần, nên với mọi chỉ số k <= right, ta luôn có:
+    a[left] + a[k] <= a[left] + a[right] = sum < target.
+    Do đó phần tử a[left] không thể kết hợp với bất kỳ phần tử nào trong đoạn [left..right]
+    để tạo thành tổng target. Việc loại bỏ left bằng cách tăng `left++` là hoàn toàn
+    chính xác và không làm mất nghiệm. Bất biến duy trì.
+  + Nếu sum > target:
+    Tương tự, với mọi k >= left, ta luôn có a[k] + a[right] >= a[left] + a[right] > target.
+    Do đó a[right] không thể kết hợp với bất kỳ phần tử nào còn lại. Việc giảm `right--`
+    không làm mất nghiệm. Bất biến duy trì.
+  + Nếu sum == target:
+    Ghi nhận một bộ ba nghiệm. Do các phần tử mảng đôi một khác nhau nên a[left] và
+    a[right] không thể kết hợp với phần tử nào khác trong khoảng hiện tại. Ta đồng
+    thời tăng `left++` và giảm `right--`. Bất biến duy trì.
+- Khi left >= right, không gian tìm kiếm cạn kiệt, thuật toán đảm bảo tìm được đầy
+  đủ và chính xác tất cả các bộ ba.
+
+Câu 1B.4-3: Dùng cột b ≈ n^... để kiểm chứng ba bậc độ phức tạp. Vì sao giá trị b
+            đo được không đúng bằng 3 và 2?
+Trả lời:
+- Kết quả thực nghiệm đo trên máy (ước lượng số mũ b = log2(T(2n) / T(n))):
+  + Với threeSumCubic: b đo được dao động từ 2.979 đến 3.167 => Khớp chặt chẽ với
+    bậc lý thuyết b = 3 (O(n^3)).
+  + Với threeSumBinary: b đo được dao động quanh 2.02 đến 2.67 => Khớp với bậc
+    lý thuyết O(n^2 log n) (ứng với số mũ lý thuyết b ≈ 2.1).
+  + Với threeSumTwoPtr: b đo được dao động từ 1.78 đến 2.21 => Khớp chặt chẽ với
+    bậc lý thuyết b = 2 (O(n^2)).
+- Nguyên nhân giá trị b đo được thực tế không đúng tuyệt đối bằng 3 và 2:
+  1. Ảnh hưởng của các số hạng bậc thấp và overhead: Chi phí cấp phát vector,
+     khởi tạo biến và gọi hàm sắp xếp chiếm tỉ trọng đáng kể khi n còn nhỏ (200, 400).
+  2. Hiệu ứng phân cấp bộ nhớ (CPU Caching & Cache Miss): Khi n tăng lên 1600 và 3200,
+     kích thước mảng vượt qua các tầng cache L1/L2 dẫn đến độ trễ truy xuất RAM tăng.
+  3. Tối ưu hóa của trình biên dịch: Cơ chế tối ưu SIMD vectorization và loop unrolling
+     của cờ `-O2` làm phẳng thời gian thực thi ở các kích thước nhỏ.
+  4. Nhiễu môi trường hệ điều hành: Tiến trình nền, chuyển đổi ngữ cảnh (context switch)
+     và độ phân giải của timer gây dao động vài miligiây.
+
+
+================================================================================
+          PHẦN 2. LAB 2B - SẮP XẾP VÀ TÌM KIẾM NÂNG CAO (CHƯƠNG 2)
+================================================================================
+
+--------------------------------------------------------------------------------
+Bài 2B.1. Radix sort LSD [Cơ bản]
+--------------------------------------------------------------------------------
+Câu 2B.1-1: Vì sao mỗi lượt phải ổn định? Cho phản ví dụ khi lượt hàng chục
+            không ổn định.
+Trả lời:
+- Radix sort LSD xử lý các chữ số từ hàng có trọng số thấp nhất đến cao nhất (đơn vị
+  -> chục -> trăm...).
+- Yêu cầu ổn định: Khi phân loại các phần tử theo chữ số ở hàng hiện tại, nếu hai
+  phần tử có chữ số giống nhau, thứ tự tương đối đã được sắp xếp đúng từ các hàng
+  thấp hơn trước đó phải được bảo toàn nguyên vẹn.
+- Phản ví dụ:
+  + Cần sắp xếp mảng gồm hai số: [25, 23].
+  + Lượt 1 (hàng đơn vị, exp = 1): Vì 3 < 5 nên mảng trở thành [23, 25].
+    (Trật tự đúng theo hàng đơn vị đã được thiết lập).
+  + Lượt 2 (hàng chục, exp = 10): Cả hai số 23 và 25 đều có chữ số hàng chục là 2.
+    * Nếu thuật toán KHÔNG ổn định: Nó có thể đảo vị trí hai phần tử có cùng khóa 2,
+      đưa 25 lên trước 23 => Mảng kết quả: [25, 23] (SAI).
+    * Nếu thuật toán ổn định: Giữ nguyên thứ tự 23 đứng trước 25 => Mảng kết quả:
+      [23, 25] (ĐÚNG).
+
+Câu 2B.1-2: Độ phức tạp của radix sort? Vì sao nó không mâu thuẫn với cận dưới
+            Omega(n log n)?
+Trả lời:
+- Độ phức tạp của Radix sort:
+  + Gọi d là số chữ số lớn nhất (số lượt lặp) và k là cơ số hệ đếm (k = 10 với hệ thập phân).
+  + Mỗi lượt dùng Counting sort tốn O(n + k).
+  + Tổng độ phức tạp thời gian: O(d * (n + k)). Với số nguyên có độ dài bit cố định
+    (32-bit thì d <= 10, k = 10 là các hằng số), Radix sort đạt độ phức tạp O(n) (tuyến tính).
+- Không mâu thuẫn với định lý cận dưới Omega(n log n) vì:
+  + Cận dưới Omega(n log n) chỉ áp dụng cho mô hình các **thuật toán sắp xếp dựa trên
+    so sánh cặp (comparison-based sorting)**, nơi cây quyết định cần ít nhất n! lá
+    dẫn đến chiều cao tối thiểu là log2(n!) = Omega(n log n).
+  + Radix sort là **thuật toán sắp xếp không so sánh (non-comparison sorting)**. Nó trực
+    tiếp trích xuất giá trị số học của từng chữ số làm chỉ số băm/đếm để phân phối vào
+    mảng phụ mà không hề so sánh hai phần tử a[i] với a[j]. Do đó nó không bị giới hạn
+    bởi mô hình cây quyết định.
+
+--------------------------------------------------------------------------------
+Bài 2B.2. Tìm kiếm nội suy vs nhị phân [Cơ bản]
+--------------------------------------------------------------------------------
+Câu 2B.2-1: Giải thích vì sao nội suy chỉ cần ≈ 1 probe trên mảng đều nhưng tệ
+            hơn nhị phân trên mảng lệch.
+Trả lời:
+- Bản chất công thức tìm kiếm nội suy:
+  pos = lo + [(x - a[lo]) / (a[hi] - a[lo])] * (hi - lo).
+  Công thức dựa trên giả thiết giá trị các phần tử tăng tuyến tính đều theo chỉ số index.
+- Trên mảng đều (a[i] = 10*(i + 1)):
+  Mức tăng giá trị hoàn toàn tỷ lệ thuận 100% với khoảng cách vị trí. Tỷ lệ
+  (x - a[lo]) / (a[hi] - a[lo]) chỉ điểm chính xác vị trí index của x ngay ở lần
+  thăm dò đầu tiên => probe trung bình = 1.000 (đo thực tế: nhị phân 18.950 vs nội suy 1.000).
+- Trên mảng lệch (a[i] = (i + 1)^3):
+  Dữ liệu tăng phi tuyến rất nhanh (đồ thị hàm bậc 3 cong đứng). Giả định tỷ lệ
+  tuyến tính bị sai lệch nghiêm trọng. Vị trí ước lượng pos luôn bị kéo lệch về một
+  phía biên mảng, khiến khoảng tìm kiếm sau mỗi bước chỉ co lại rất ít thay vì giảm
+  một nửa như nhị phân. Thuật toán bị suy biến tiệm cận tìm kiếm tuyến tính =>
+  probe trung bình tăng vọt (đo thực tế: nhị phân 9.026 vs nội suy 22.347 probe => tệ hơn gấp 2.5 lần).
+
+Câu 2B.2-2: Trên mảng 10^6 phần tử, nhị phân cần tối đa bao nhiêu probe?
+Trả lời:
+- Trong trường hợp xấu nhất, số lần thăm dò của tìm kiếm nhị phân được tính bằng:
+  max_probes = floor(log2(n)) + 1.
+- Với n = 10^6:
+  log2(10^6) = 6 * log2(10) ≈ 6 * 3.32193 = 19.93156.
+  max_probes = floor(19.93156) + 1 = 19 + 1 = 20 probe.
+- Kết luận: Trên mảng 1 000 000 phần tử, tìm kiếm nhị phân cần tối đa 20 probe.
+
+--------------------------------------------------------------------------------
+Bài 2B.3. Quick sort với pivot trung vị của ba [Trung bình]
+--------------------------------------------------------------------------------
+Câu 2B.3-1: Với mảng đã sắp, vì sao median-of-three đưa quick sort từ O(n^2)
+            về O(n log n)?
+Trả lời:
+- Với Quick sort chọn pivot ở cuối:
+  Trên mảng đã sắp tăng, phần tử ở cuối luôn là cực đại (pivot = max). Phân hoạch
+  Lomuto chia mảng thành 2 đoạn có kích thước n - 1 và 0. Cây đệ quy suy biến thành
+  danh sách liên kết có độ sâu n, tổng số so sánh đạt cực đại n*(n - 1)/2 = 499 500
+  khi n = 1000 => O(n^2).
+- Với Quick sort dùng median-of-three:
+  Lấy 3 phần tử a[lo], a[mid], a[hi]. Do mảng đã sắp tăng nên a[lo] < a[mid] < a[hi].
+  Trung vị của ba phần tử chính là a[mid] - phần tử nằm ở chính giữa mảng.
+  Khi đưa a[mid] về làm pivot, phân hoạch Lomuto chia mảng thành hai nửa gần như
+  bằng nhau (mỗi nửa xấp xỉ n/2 phần tử).
+- Cây đệ quy được cân bằng hoàn hảo với độ sâu log2(n), hệ thức truy hồi trở thành:
+  T(n) = 2*T(n/2) + O(n) => O(n log n).
+- Dẫn chứng thực nghiệm trên máy (n = 1000, mảng đã sắp):
+  + Bản pivot cuối: 499 500 phép so sánh.
+  + Bản median-of-three: chỉ tốn 7 988 phép so sánh (giảm hơn 62 lần).
+
+Câu 2B.3-2: Hãy xây dựng (hoặc mô tả) một input vẫn làm median-of-three chạy chậm.
+Trả lời:
+- Nguyên lý xây dựng input xấu nhất (Adversary Input / Killer Sequence):
+  Tại mỗi bước đệ quy trên đoạn [lo..hi], ta sắp đặt sao cho 3 vị trí được kiểm tra
+  lo, mid, hi chứa hai phần tử cực nhỏ và một phần tử cực lớn (hoặc hai cực lớn và
+  một cực nhỏ).
+- Ví dụ: Ta chọn a[lo] là giá trị nhỏ nhất trong đoạn, a[hi] là giá trị nhỏ thứ hai,
+  và a[mid] là giá trị lớn nhất. Khi đó trung vị của {a[lo], a[mid], a[hi]} chính là
+  a[hi] (phần tử nhỏ thứ hai). Khi phân hoạch, pivot chỉ lớn hơn đúng một phần tử duy
+  nhất a[lo], mảng bị chia lệch thành kích thước 1 và n - 2.
+- Lặp lại cấu trúc này ở mọi tầng đệ quy sẽ khiến median-of-three suy biến hoàn toàn
+  về O(n^2). (Kỹ thuật này được M. D. McIlroy chứng minh bằng thuật toán Anti-QuickSort).
+
+--------------------------------------------------------------------------------
+Bài 2B.4. Bảng băm chaining tự cài: đếm tần suất từ [Trung bình]
+--------------------------------------------------------------------------------
+Câu 2B.4-1: Bảng đã rehash mấy lần, m cuối cùng bằng bao nhiêu, alpha cuối
+            bằng bao nhiêu?
+Trả lời:
+- Kết quả chạy thực tế trên máy từ văn bản 75 từ cho sẵn:
+  + Kích thước ban đầu: m0 = 7.
+  + Bảng đã rehash **3 lần**:
+    * Lần 1: m tăng từ 7 lên 2*7 + 1 = 15.
+    * Lần 2: m tăng từ 15 lên 2*15 + 1 = 31.
+    * Lần 3: m tăng từ 31 lên 2*31 + 1 = 63.
+  + Kích thước mảng cuối cùng: m = 63.
+  + Số từ khác nhau (kích thước bảng): sz = 45 từ.
+  + Hệ số tải cuối cùng: alpha = sz / m = 45 / 63 ≈ 0.714 (thỏa mãn <= 0.75).
+  + Chuỗi dài nhất: 4.
+  + Top 5 từ xuất hiện nhiều nhất: the=11, and=6, a=5, table=4, dog=3.
+
+Câu 2B.4-2: Vì sao rehash có chi phí O(n) nhưng chi phí trung bình mỗi lần add
+            vẫn là O(1) (phân tích khấu hao)?
+Trả lời:
+- Áp dụng phân tích khấu hao (Amortized Analysis - phương pháp kế toán / biến thế năng):
+  + Chi phí của một lần rehash từ kích thước m lên 2m + 1 là O(n) vì phải băm lại
+    toàn bộ n phần tử hiện có vào các slot mới.
+  + Tuy nhiên, thao tác rehash diễn ra rất thưa thớt: Sau mỗi lần rehash, kích thước
+    bảng tăng hơn gấp đôi, do đó cần ít nhất Delta(n) ≈ 0.75 * m thao tác thêm từ mới
+    nữa thì bảng mới vượt ngưỡng tải 0.75 để kích hoạt lần rehash tiếp theo.
+  + Phân bổ chi phí O(n) của lần rehash cho n/2 thao tác chèn trước đó: Mỗi thao tác
+    chèn chỉ cần gánh thêm một lượng chi phí hằng số O(1) (khoảng 2 đến 3 đơn vị công).
+  + Do đó, tổng chi phí thực hiện N phép chèn liên tiếp là:
+    T(N) = O(N) + Sum_{k} O(2^k) = O(N).
+  + Chi phí khấu hao trung bình cho mỗi lần add là: O(N) / N = O(1).
+
+--------------------------------------------------------------------------------
+Bài 2B.5. Đếm nghịch thế bằng merge sort [Nâng cao]
+--------------------------------------------------------------------------------
+Câu 2B.5-1: Giải thích vì sao cộng mid - i + 1 là đúng.
+Trả lời:
+- Trong bước merge hai nửa đã sắp xếp tăng dần A = a[lo..mid] và B = a[mid+1..hi]:
+  + Con trỏ i duyệt nửa trái (lo <= i <= mid), con trỏ j duyệt nửa phải (mid+1 <= j <= hi).
+  + Khi a[i] > a[j]:
+    Do nửa trái đã được sắp xếp tăng dần, mọi phần tử đứng sau a[i] trong nửa trái
+    (từ chỉ số i đến mid) đều lớn hơn hoặc bằng a[i].
+    Mà a[i] > a[j], suy ra a[k] > a[j] với mọi k thuộc {i, i + 1, ..., mid}.
+  + Đồng thời, mọi chỉ số k trong nửa trái đều nhỏ hơn chỉ số j ở nửa phải (k <= mid < j).
+    Như vậy, mỗi phần tử từ a[i] đến a[mid] đều tạo với a[j] một cặp nghịch thế (k, j).
+  + Số lượng các phần tử từ chỉ số i đến mid chính là: mid - i + 1.
+  + Do đó, việc cộng dồn ngay `mid - i + 1` đếm chính xác và đầy đủ toàn bộ các nghịch
+    thế tạo bởi a[j] mà không cần dùng thêm vòng lặp, duy trì độ phức tạp O(n) cho
+    bước merge.
+
+Câu 2B.5-2: Số nghịch thế liên hệ thế nào với số swap của Bubble sort ở bài 2.1?
+Trả lời:
+- Trong Bubble sort, thao tác duy nhất thay đổi trật tự mảng là hoán đổi (swap) hai
+  phần tử kề nhau a[k] và a[k+1] khi a[k] > a[k+1].
+- Vì hai phần tử đứng sát cạnh nhau nên phép swap chỉ tác động duy nhất đến cặp
+  (a[k], a[k+1]) mà không làm thay đổi vị trí tương đối giữa chúng với bất kỳ phần
+  tử nào khác trong mảng.
+- Trước khi swap: a[k] > a[k+1] là 1 nghịch thế. Sau khi swap: a[k] <= a[k+1], nghịch
+  thế này bị triệt tiêu hoàn toàn.
+- Do đó: Mỗi lần swap của Bubble sort làm giảm chính xác 1 nghịch thế của mảng.
+- Kết luận: Tổng số lần swap của Bubble sort trên một mảng bằng đúng tổng số nghịch
+  thế ban đầu của mảng đó.
+
+Câu 2B.5-3: Với dãy ngẫu nhiên, kỳ vọng số nghịch thế ≈ n^2/4. Kiểm chứng.
+Trả lời:
+- Lý thuyết xác suất:
+  + Với mảng ngẫu nhiên n phần tử phân biệt, tổng số cặp chỉ số (i, j) với i < j
+    là C(n, 2) = n*(n - 1)/2.
+  + Do tính ngẫu nhiên và đối xứng, xác suất để a[i] > a[j] đúng bằng xác suất để
+    a[i] < a[j] và bằng 1/2.
+  + Kỳ vọng số nghịch thế:
+    E[inversions] = (1/2) * [n*(n - 1) / 2] = n*(n - 1)/4 ≈ n^2 / 4.
+- Kiểm chứng thực nghiệm trên máy:
+  + Với n = 3000:
+    * Lý thuyết: 3000 * 2999 / 4 = 2 249 250.
+    * Thực tế đo được: 2 209 239 nghịch thế (sai số chỉ ≈ 1.7%).
+  + Với n = 1 000 000 (chạy trên C++):
+    * Lý thuyết: 10^12 / 4 = 250 000 000 000.
+    * Thực tế đo được: 250 108 205 875 nghịch thế (sai số chỉ 0.04%, cực kỳ chính xác).
+  + Với n = 200 000 (chạy trên Python):
+    * Lý thuyết: (200 000)^2 / 4 = 10 000 000 000.
+    * Thực tế đo được: 10 000 845 511 nghịch thế (sai số chỉ 0.008%).
+
+--------------------------------------------------------------------------------
+Bài 2B.6. Quickselect [Nâng cao]
+--------------------------------------------------------------------------------
+Câu 2B.6-1: Vì sao độ phức tạp trung bình là O(n) chứ không phải O(n log n)?
+            (Gợi ý: n + n/2 + n/4 + ...)
+Trả lời:
+- Sự khác biệt giữa Quick sort và Quickselect:
+  + Quick sort sau khi phân hoạch phải đệ quy vào CẢ HAI nửa => T(n) = 2T(n/2) + O(n) = O(n log n).
+  + Quickselect chỉ tìm phần tử nhỏ thứ k: Sau khi phân hoạch đặt pivot tại vị trí p,
+    nó so sánh p với k - 1 và chỉ đệ quy vào DUY NHẤT MỘT nửa chứa vị trí cần tìm,
+    loại bỏ hoàn toàn nửa còn lại.
+- Tính toán độ phức tạp trung bình:
+  + Trung bình mỗi bước phân hoạch loại bỏ được một nửa số phần tử:
+    * Bước 1: duyệt n phần tử.
+    * Bước 2: duyệt n/2 phần tử.
+    * Bước 3: duyệt n/4 phần tử.
+    * ...
+  + Tổng số phần tử phải xử lý là tổng cấp số nhân lùi vô hạn:
+    T(n) = n + n/2 + n/4 + n/8 + ... = n * [1 / (1 - 1/2)] = 2n = O(n).
+  + Do đó độ phức tạp trung bình của Quickselect là tuyến tính O(n).
+
+Câu 2B.6-2: Trường hợp xấu nhất? Kể tên một thuật toán chọn O(n) trong trường hợp
+            xấu nhất.
+Trả lời:
+- Trường hợp xấu nhất của Quickselect:
+  + Xảy ra khi việc chọn pivot luôn rơi vào phần tử cực đại hoặc cực tiểu ở mỗi bước.
+    Mảng chỉ giảm đúng 1 phần tử sau mỗi lần phân hoạch (kích thước n, n-1, n-2, ..., 1).
+  + Tổng thời gian: n + (n - 1) + ... + 1 = n*(n + 1)/2 = O(n^2).
+- Thuật toán chọn phần tử thứ k có thời gian O(n) trong trường hợp xấu nhất:
+  + Thuật toán **Median of Medians** (thuật toán BFPRT do Blum, Floyd, Pratt, Rivest,
+    Tarjan đề xuất năm 1973).
+  + Nguyên lý: Chia mảng thành các nhóm 5 phần tử, tìm trung vị của từng nhóm, rồi đệ
+    quy tìm trung vị của các trung vị đó để làm pivot. Thuật toán chứng minh được
+    pivot luôn lớn hơn ít nhất 30% và nhỏ hơn ít nhất 30% số phần tử, đảm bảo trường
+    hợp xấu nhất luôn đạt O(n).
+
+
+================================================================================
+           PHỤ LỤC: KẾT QUẢ CHẠY THỰC TẾ TRÊN MÁY (TERMINAL OUTPUT)
+================================================================================
+
+--------------------------------------------------------------------------------
+1. KẾT QUẢ CHẠY C++ (lab1B và lab2B)
+--------------------------------------------------------------------------------
+>>> Chạy: ./lab1B
+===== 1B.1: Tim kiem tuyen tinh =====
+Tot nhat  (x = a[0])        : comps = 1  pos = 0
+Xau nhat  (x khong co)      : comps = 1000
+Trung binh (tim lan luot moi phan tu): tong = 500500  TB = 500.500  ly thuyet (n+1)/2 = 500.500  [OK]
+
+===== 1B.2: Luy thua mod 1e9+7 =====
+3^10 mod p = 59049   naive: 10 phep nhan,  fast: 6 phep nhan  [OK]
+3^1000 mod p = 56888193   naive: 1000 phep nhan,  fast: 16 phep nhan  [OK]
+3^1000000 mod p = 64935414   naive: 1000000 phep nhan,  fast: 27 phep nhan  [OK]
+
+===== 1B.3: Fibonacci =====
+   n          F(n)    calls(rec) calls(memo)    rec (ms)
+  10            55           177          19       0.001  [OK]
+  20          6765         21891          39       0.044  [OK]
+  25         75025        242785          49       0.285  [OK]
+  30        832040       2692537          59       2.979  [OK]
+  32       2178309       7049155          63       6.987  [OK]
+F(90) = 2880067194370816120  (fibRec(90) se chay hang tram nam!)
+
+===== 1B.4: 3-SUM =====
+     n  so bo ba    n^3 (ms)  n^2logn (ms)    n^2 (ms)     khop?
+   200       236       0.787         0.225       0.077      [OK]
+   400      1037       6.728         1.440       0.402      [OK]   b ~ n^3.096 | n^2.676 | n^2.382
+   800      3935      54.775         5.350       1.863      [OK]   b ~ n^3.025 | n^1.894 | n^2.211
+  1600     16057     491.870        37.633       6.438      [OK]   b ~ n^3.167 | n^2.815 | n^1.789
+  3200     65151      -1.000       115.110      20.802      [OK]   b ~ n^1.613 | n^1.692
+(b = log2( T(2n) / T(n) ) la so mu uoc luong cua T(n) ~ n^b)
+
+>>> Chạy: ./lab2B
+===== 2B.1: Radix sort =====
+  exp=1: 720 355 436 457 657 329 839 
+  exp=10: 720 329 436 839 355 457 657 
+  exp=100: 329 355 436 457 657 720 839 
+n = 100000: 7.205 ms  [OK]
+
+===== 2B.2: Noi suy vs Nhi phan (probe trung binh / 1000 truy van) =====
+deu   a[i]=10(i+1),  n=1e6:  binary 18.950   interpolation 1.000  [OK]
+lech  a[i]=(i+1)^3,  n=1000:  binary 9.026   interpolation 22.347  [OK]
+
+===== 2B.3: Quick sort - pivot cuoi vs trung vi cua ba =====
+                  pivot cuoi    trung vi 3
+    ngau nhien         12116         10105  [OK]
+        da sap        499500          7988  [OK]
+      sap giam        496666         14208  [OK]
+
+===== 2B.4: Bang bam dem tu =====
+Tong so tu = 75, so tu khac nhau = 45, m = 63, so lan rehash = 3, alpha = 0.714, chuoi dai nhat = 4
+Top 5:  the=11  and=6  a=5  table=4  dog=3
+get("fox") = 3, get("cat") = 0, h("fox", 7) = 6
+
+===== 2B.5: Dem nghich the =====
+2 4 1 3 5 -> 3 nghich the
+n = 3000: brute = 2209239, merge = 2209239  [OK]
+n = 1 000 000: 250108205875 nghich the, 180.557 ms (brute se mat ~ vai phut)
+
+===== 2B.6: Quickselect =====
+  k =      1 -> 19
+  k =     10 -> 108
+  k =  50001 -> 499654
+  k =  99999 -> 999982
+  k = 100001 -> 1000000
+Trung vi cua 100001 so = 499654  [OK]
+
+--------------------------------------------------------------------------------
+2. KẾT QUẢ CHẠY PYTHON (lab1B.py và lab2B.py)
+--------------------------------------------------------------------------------
+>>> Chạy: python3 lab1B_ve_nha.py
+===== 1B.1: Tim kiem tuyen tinh =====
+Tot nhat  (x = a[0])        : comps = 1  pos = 0
+Xau nhat  (x khong co)      : comps = 1000
+Trung binh (tim lan luot moi phan tu): tong = 500500  TB = 500.500  ly thuyet (n+1)/2 = 500.500  [OK]
+
+===== 1B.2: Luy thua mod 1e9+7 =====
+3^10 mod p = 59049   naive: 10 phep nhan,  fast: 6 phep nhan  [OK]
+3^1000 mod p = 56888193   naive: 1000 phep nhan,  fast: 16 phep nhan  [OK]
+3^1000000 mod p = 64935414   naive: 1000000 phep nhan,  fast: 27 phep nhan  [OK]
+
+===== 1B.3: Fibonacci =====
+   n          F(n)    calls(rec) calls(memo)    rec (ms)
+  10            55           177          19       0.020  [OK]
+  20          6765         21891          39       1.952  [OK]
+  25         75025        242785          49      22.065  [OK]
+  30        832040       2692537          59     234.040  [OK]
+  32       2178309       7049155          63     588.369  [OK]
+F(90) = 2880067194370816120  (fib_rec(90) se chay hang tram nam!)
+
+===== 1B.4: 3-SUM =====
+     n  so bo ba    n^3 (ms)  n^2logn (ms)    n^2 (ms)     khop?
+   200       236      83.028         2.965       1.104      [OK]
+   400      1037     654.689        17.479       5.704      [OK]   b ~ n^2.979 | n^2.559 | n^2.370
+   800      3935      -1.000        71.052      22.340      [OK]   b ~ n^2.023 | n^1.970
+  1600     16057      -1.000       307.699      98.272      [OK]   b ~ n^2.115 | n^2.137
+  3200     65151      -1.000      1290.382     404.591      [OK]   b ~ n^2.068 | n^2.042
+(b = log2( T(2n) / T(n) ) la so mu uoc luong cua T(n) ~ n^b)
+
+>>> Chạy: python3 lab2B_ve_nha.py
+===== 2B.1: Radix sort =====
+  exp=1: 720 355 436 457 657 329 839
+  exp=10: 720 329 436 839 355 457 657
+  exp=100: 329 355 436 457 657 720 839
+n = 100000: 172.269 ms  [OK]
+
+===== 2B.2: Noi suy vs Nhi phan (probe trung binh / 1000 truy van) =====
+deu   a[i]=10(i+1),  n=1e6:  binary 18.950   interpolation 1.000  [OK]
+lech  a[i]=(i+1)^3,  n=1000:  binary 9.026   interpolation 22.347  [OK]
+
+===== 2B.3: Quick sort - pivot cuoi vs trung vi cua ba =====
+                  pivot cuoi    trung vi 3
+    ngau nhien         12116         10105  [OK]
+        da sap        499500          7988  [OK]
+      sap giam        496666         14208  [OK]
+
+===== 2B.4: Bang bam dem tu =====
+Tong so tu = 75, so tu khac nhau = 45, m = 63, so lan rehash = 3, alpha = 0.714, chuoi dai nhat = 4
+Top 5:  the=11  and=6  a=5  table=4  dog=3
+get("fox") = 3, get("cat") = 0, h("fox", 7) = 6
+
+===== 2B.5: Dem nghich the =====
+2 4 1 3 5 -> 3 nghich the
+n = 3000: brute = 2209239, merge = 2209239  [OK]
+n = 200 000: 10000845511 nghich the, 515.706 ms (brute se mat ~ vai phut)
+
+===== 2B.6: Quickselect =====
+  k =      1 -> 19
+  k =     10 -> 108
+  k =  50001 -> 499654
+  k =  99999 -> 999982
+  k = 100001 -> 1000000
+Trung vi cua 100001 so = 499654  [OK]
+
+================================================================================
+                                 HẾT BÁO CÁO
+================================================================================

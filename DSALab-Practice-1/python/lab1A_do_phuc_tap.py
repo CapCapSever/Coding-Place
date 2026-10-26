@@ -32,6 +32,25 @@ EPS = 1e-9
 
 def solve_quadratic(a, b, c):
     # TODO: viet code cua ban o day
+    if abs(a) <= EPS:
+        if abs(b) <= EPS:
+            if abs(c) <= EPS:
+                return (-1, 0.0, 0.0)
+            return (0, 0.0, 0.0)
+        temp = -c / b
+        return (1, temp, temp)
+    delta = b * b - 4 * a * c
+    if abs(delta) <= EPS:
+        delta = 0.0
+    if delta < -EPS:
+        return (0, 0.0, 0.0)
+    if abs(delta) <= EPS:
+        temp = -b / (2 * a)
+        return (1, temp, temp)
+    elif delta > EPS:
+        x1 = (-b - math.sqrt(delta)) / (2 * a)
+        x2 = (-b + math.sqrt(delta)) / (2 * a)
+        return (2, min(x1, x2), max(x1, x2))
     return (0, 0.0, 0.0)
 
 
@@ -51,7 +70,8 @@ def count_f1(n):
     """F1: for i in 0..n-1: cnt += 1"""
     cnt = 0
     # TODO: viet code cua ban o day
-    pass
+    for i in range(n):
+        cnt += 1
     return cnt
 
 
@@ -59,7 +79,9 @@ def count_f2(n):
     """F2: for i in 0..n-1: for j in 0..n-1: cnt += 1"""
     cnt = 0
     # TODO: viet code cua ban o day
-    pass
+    for i in range(n):
+        for j in range(n):
+            cnt += 1
     return cnt
 
 
@@ -67,7 +89,9 @@ def count_f3(n):
     """F3: for i in 0..n-1: for j in i+1..n-1: cnt += 1"""
     cnt = 0
     # TODO: viet code cua ban o day
-    pass
+    for i in range(n):
+        for j in range(i + 1, n):
+            cnt += 1
     return cnt
 
 
@@ -75,7 +99,10 @@ def count_f4(n):
     """F4: i = 1; while i < n: cnt += 1; i *= 2"""
     cnt = 0
     # TODO: viet code cua ban o day
-    pass
+    i = 1
+    while i < n:
+        cnt += 1
+        i *= 2
     return cnt
 
 
@@ -83,33 +110,37 @@ def count_f5(n):
     """F5: for i in 0..n-1: j = 1; while j < n: cnt += 1; j *= 2"""
     cnt = 0
     # TODO: viet code cua ban o day
-    pass
+    for i in range(n):
+        j = 1
+        while j < n:
+            cnt += 1
+            j *= 2
     return cnt
 
 
 def formula_f1(n):
     # TODO: viet code cua ban o day
-    return 0
+    return n
 
 
 def formula_f2(n):
     # TODO: viet code cua ban o day
-    return 0
+    return n * n
 
 
 def formula_f3(n):
     # TODO: viet code cua ban o day
-    return 0
+    return n * (n - 1) // 2
 
 
 def formula_f4(n):
     # TODO: viet code cua ban o day
-    return 0
+    return ceil_log2(n)
 
 
 def formula_f5(n):
     # TODO: viet code cua ban o day
-    return 0
+    return n * ceil_log2(n)
 
 
 # =====================================================================
@@ -121,16 +152,31 @@ pair_comparisons = 0   # has_dup_brute phai tang bien nay moi lan so sanh a[i] =
 def has_dup_brute(a):
     global pair_comparisons
     # TODO: viet code cua ban o day
+    n = len(a)
+    for i in range(n):
+        for j in range(i + 1, n):
+            pair_comparisons += 1
+            if a[i] == a[j]:
+                return True
     return False
 
 
 def has_dup_sort(a):
     # TODO: viet code cua ban o day
+    b = sorted(a)
+    for i in range(1, len(b)):
+        if b[i] == b[i - 1]:
+            return True
     return False
 
 
 def has_dup_hash(a):
     # TODO: viet code cua ban o day
+    seen = set()
+    for x in a:
+        if x in seen:
+            return True
+        seen.add(x)
     return False
 
 

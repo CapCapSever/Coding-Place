@@ -52,19 +52,56 @@ def show(a):
 def selection_sort(a, st):
     """comps++ moi lan so sanh a[j] < a[min_pos]; moves++ khi swap (chi khi min_pos != i)"""
     # TODO: viet code cua ban o day
-    pass
+    n = len(a)
+    for i in range(n - 1):
+        min_pos = i
+        for j in range(i + 1, n):
+            st.comps += 1
+            if a[j] < a[min_pos]:
+                min_pos = j
+        if min_pos != i:
+            a[i], a[min_pos] = a[min_pos], a[i]
+            st.moves += 1
+        if TRACE:
+            print("  " + show(a))
 
 
 def insertion_sort(a, st):
     """comps++ moi lan so sanh a[j] > key (khi j >= 0); moves++ moi lan dich a[j+1] = a[j]"""
     # TODO: viet code cua ban o day
-    pass
+    n = len(a)
+    for i in range(1, n):
+        key = a[i]
+        j = i - 1
+        while j >= 0:
+            st.comps += 1
+            if a[j] > key:
+                a[j + 1] = a[j]
+                st.moves += 1
+                j -= 1
+            else:
+                break
+        a[j + 1] = key
+        if TRACE:
+            print("  " + show(a))
 
 
 def bubble_sort(a, st):
     """Co co swapped. comps++ moi lan so sanh a[j] > a[j+1]; moves++ moi lan swap"""
     # TODO: viet code cua ban o day
-    pass
+    n = len(a)
+    for i in range(n - 1):
+        swapped = False
+        for j in range(n - 1 - i):
+            st.comps += 1
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+                st.moves += 1
+                swapped = True
+        if TRACE:
+            print("  " + show(a))
+        if not swapped:
+            break
 
 
 # =====================================================================
@@ -72,22 +109,56 @@ def bubble_sort(a, st):
 # =====================================================================
 def partition_lomuto(a, lo, hi, st):
     # TODO: viet code cua ban o day
-    return lo
+    pivot = a[hi]
+    i = lo - 1
+    for j in range(lo, hi):
+        st.comps += 1
+        if a[j] <= pivot:
+            i += 1
+            a[i], a[j] = a[j], a[i]
+            st.moves += 1
+    a[i + 1], a[hi] = a[hi], a[i + 1]
+    st.moves += 1
+    return i + 1
 
 
 def quick_sort(a, lo, hi, st):
     # TODO: viet code cua ban o day
-    pass
+    if lo < hi:
+        p = partition_lomuto(a, lo, hi, st)
+        quick_sort(a, lo, p - 1, st)
+        quick_sort(a, p + 1, hi, st)
 
 
 def merge_runs(a, lo, mid, hi, st):
     # TODO: viet code cua ban o day
-    pass
+    temp = []
+    i, j = lo, mid + 1
+    while i <= mid and j <= hi:
+        st.comps += 1
+        if a[i] <= a[j]:
+            temp.append(a[i])
+            i += 1
+        else:
+            temp.append(a[j])
+            j += 1
+    while i <= mid:
+        temp.append(a[i])
+        i += 1
+    while j <= hi:
+        temp.append(a[j])
+        j += 1
+    for k in range(len(temp)):
+        a[lo + k] = temp[k]
 
 
 def merge_sort(a, lo, hi, st):
     # TODO: viet code cua ban o day
-    pass
+    if lo < hi:
+        mid = lo + (hi - lo) // 2
+        merge_sort(a, lo, mid, st)
+        merge_sort(a, mid + 1, hi, st)
+        merge_runs(a, lo, mid, hi, st)
 
 
 # =====================================================================
@@ -96,6 +167,19 @@ def merge_sort(a, lo, hi, st):
 # =====================================================================
 def binary_search_trace(a, x, trace):
     # TODO: viet code cua ban o day
+    lo, hi = 0, len(a) - 1
+    step = 1
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2
+        if trace:
+            print(f"  step {step}: lo={lo} hi={hi} mid={mid} a[mid]={a[mid]}")
+            step += 1
+        if a[mid] == x:
+            return mid
+        elif a[mid] < x:
+            lo = mid + 1
+        else:
+            hi = mid - 1
     return -1
 
 
@@ -109,11 +193,18 @@ class ChainingTable:
 
     def insert(self, k):
         # TODO: viet code cua ban o day
-        pass
+        idx = k % self.m
+        self.slot[idx].insert(0, k)
 
     def search_probes(self, k):
         # TODO: viet code cua ban o day
-        return 0
+        idx = k % self.m
+        probes = 0
+        for v in self.slot[idx]:
+            probes += 1
+            if v == k:
+                return probes
+        return probes
 
     def print(self):
         for i, chain in enumerate(self.slot):
@@ -127,11 +218,22 @@ class LinearProbingTable:
 
     def insert(self, k):
         # TODO: viet code cua ban o day
+        for step in range(self.m):
+            cur = (k % self.m + step) % self.m
+            if self.t[cur] == -1:
+                self.t[cur] = k
+                return True
         return False
 
     def search_probes(self, k):
         # TODO: viet code cua ban o day
-        return 0
+        probes = 0
+        for step in range(self.m):
+            cur = (k % self.m + step) % self.m
+            probes += 1
+            if self.t[cur] == k or self.t[cur] == -1:
+                return probes
+        return probes
 
     def print(self):
         print("  " + " ".join(f"[{i}]{'_' if v == -1 else v}" for i, v in enumerate(self.t)) + " ")

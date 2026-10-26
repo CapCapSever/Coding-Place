@@ -38,6 +38,10 @@ comps = 0
 def linear_search(a, x):
     global comps
     # TODO: viet code cua ban o day
+    for i in range(len(a)):
+        comps += 1
+        if a[i] == x:
+            return i
     return -1
 
 
@@ -51,13 +55,27 @@ mults = 0
 def pow_naive(b, e, m):
     global mults
     # TODO: viet code cua ban o day
-    return 0
+    res = 1 % m
+    b %= m
+    for _ in range(e):
+        res = (res * b) % m
+        mults += 1
+    return res
 
 
 def pow_fast(b, e, m):
     global mults
     # TODO: viet code cua ban o day
-    return 0
+    res = 1 % m
+    b %= m
+    while e > 0:
+        if e % 2 == 1:
+            res = (res * b) % m
+            mults += 1
+        b = (b * b) % m
+        mults += 1
+        e //= 2
+    return res
 
 
 # =====================================================================
@@ -69,13 +87,26 @@ calls = 0
 def fib_rec(n):
     global calls
     # TODO: viet code cua ban o day
-    return 0
+    calls += 1
+    if n <= 0:
+        return 0
+    if n == 1:
+        return 1
+    return fib_rec(n - 1) + fib_rec(n - 2)
 
 
 def fib_memo_helper(n, memo):
     global calls
     # TODO: viet code cua ban o day
-    return 0
+    calls += 1
+    if n <= 0:
+        return 0
+    if n == 1:
+        return 1
+    if memo[n] != -1:
+        return memo[n]
+    memo[n] = fib_memo_helper(n - 1, memo) + fib_memo_helper(n - 2, memo)
+    return memo[n]
 
 
 def fib_memo(n):
@@ -84,7 +115,14 @@ def fib_memo(n):
 
 def fib_iter(n):
     # TODO: viet code cua ban o day
-    return 0
+    if n <= 0:
+        return 0
+    if n == 1:
+        return 1
+    prev2, prev1 = 0, 1
+    for _ in range(2, n + 1):
+        prev2, prev1 = prev1, prev2 + prev1
+    return prev1
 
 
 # =====================================================================
@@ -92,17 +130,50 @@ def fib_iter(n):
 # =====================================================================
 def three_sum_cubic(a):
     # TODO: viet code cua ban o day
-    return 0
+    n = len(a)
+    count = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            for k in range(j + 1, n):
+                if a[i] + a[j] + a[k] == 0:
+                    count += 1
+    return count
 
 
 def three_sum_binary(a):
     # TODO: viet code cua ban o day
-    return 0
+    a = sorted(a)
+    n = len(a)
+    count = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            target = -(a[i] + a[j])
+            idx = bisect_left(a, target, j + 1, n)
+            if idx < n and a[idx] == target:
+                count += 1
+    return count
 
 
 def three_sum_two_ptr(a):
     # TODO: viet code cua ban o day
-    return 0
+    a = sorted(a)
+    n = len(a)
+    count = 0
+    for i in range(n):
+        target = -a[i]
+        left = i + 1
+        right = n - 1
+        while left < right:
+            s = a[left] + a[right]
+            if s == target:
+                count += 1
+                left += 1
+                right -= 1
+            elif s < target:
+                left += 1
+            else:
+                right -= 1
+    return count
 
 
 def distinct_data(n, seed):

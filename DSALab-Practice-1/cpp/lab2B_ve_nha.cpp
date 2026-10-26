@@ -41,9 +41,34 @@ void printArr(const vector<int>& a) { for (int x : a) cout << x << ' '; cout << 
 // =====================================================================
 void countingByDigit(vector<int>& a, int exp) {
     // TODO: viet code cua ban o day
+    if (a.empty()) return;
+    int n = a.size();
+    vector<int> out(n);
+    int count[10] = {0};
+    for (int i = 0; i < n; i++) {
+        int digit = (a[i] / exp) % 10;
+        count[digit]++;
+    }
+    for (int i = 1; i < 10; i++) {
+        count[i] += count[i - 1];
+    }
+    for (int i = n - 1; i >= 0; i--) {
+        int digit = (a[i] / exp) % 10;
+        out[--count[digit]] = a[i];
+    }
+    a = move(out);
 }
 void radixSort(vector<int>& a, bool trace) {
     // TODO: viet code cua ban o day
+    if (a.empty()) return;
+    int mx = *max_element(a.begin(), a.end());
+    for (int exp = 1; mx / exp > 0; exp *= 10) {
+        countingByDigit(a, exp);
+        if (trace) {
+            cout << "  exp=" << exp << ": ";
+            printArr(a);
+        }
+    }
 }
 
 // =====================================================================
@@ -53,10 +78,31 @@ void radixSort(vector<int>& a, bool trace) {
 long long probes = 0;
 int binarySearch(const vector<long long>& a, long long x) {
     // TODO: viet code cua ban o day
+    int lo = 0, hi = (int)a.size() - 1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        probes++;
+        if (a[mid] == x) return mid;
+        if (a[mid] < x) lo = mid + 1;
+        else hi = mid - 1;
+    }
     return -1;
 }
 int interpolationSearch(const vector<long long>& a, long long x) {
     // TODO: viet code cua ban o day
+    int lo = 0, hi = (int)a.size() - 1;
+    while (lo <= hi && x >= a[lo] && x <= a[hi]) {
+        if (a[lo] == a[hi]) {
+            probes++;
+            if (a[lo] == x) return lo;
+            return -1;
+        }
+        int pos = lo + (x - a[lo]) * (hi - lo) / (a[hi] - a[lo]);
+        probes++;
+        if (a[pos] == x) return pos;
+        if (a[pos] < x) lo = pos + 1;
+        else hi = pos - 1;
+    }
     return -1;
 }
 
@@ -81,9 +127,22 @@ void quickSortLast(vector<int>& a, int lo, int hi) {         // ban goc (da cho 
 }
 void medianOfThree(vector<int>& a, int lo, int hi) {
     // TODO: viet code cua ban o day
+    if (hi - lo < 2) return;
+    int mid = lo + (hi - lo) / 2;
+    if (a[lo] > a[mid]) swap(a[lo], a[mid]);
+    if (a[lo] > a[hi]) swap(a[lo], a[hi]);
+    if (a[mid] > a[hi]) swap(a[mid], a[hi]);
+    swap(a[mid], a[hi]);
 }
 void quickSortMed3(vector<int>& a, int lo, int hi) {
     // TODO: viet code cua ban o day
+    if (lo >= hi) return;
+    if (hi - lo >= 2) {
+        medianOfThree(a, lo, hi);
+    }
+    int p = lomuto(a, lo, hi);
+    quickSortMed3(a, lo, p - 1);
+    quickSortMed3(a, p + 1, hi);
 }
 
 // =====================================================================
@@ -97,16 +156,49 @@ struct WordCounter {
     explicit WordCounter(int m0) : m(m0), slot(m0) {}
     static int hashStr(const string& s, int m) {
         // TODO: viet code cua ban o day
-        return 0;
+        long long h = 0;
+        for (char c : s) {
+            h = (h * 31 + (unsigned char)c) % m;
+        }
+        return (int)h;
     }
     void rehash() {
         // TODO: viet code cua ban o day
+        rehashes++;
+        int new_m = 2 * m + 1;
+        vector<vector<pair<string, int>>> new_slot(new_m);
+        for (const auto& chain : slot) {
+            for (const auto& kv : chain) {
+                int idx = hashStr(kv.first, new_m);
+                new_slot[idx].push_back(kv);
+            }
+        }
+        m = new_m;
+        slot = move(new_slot);
     }
     void add(const string& w) {                // tang dem cua w them 1
         // TODO: viet code cua ban o day
+        int idx = hashStr(w, m);
+        for (auto& kv : slot[idx]) {
+            if (kv.first == w) {
+                kv.second++;
+                return;
+            }
+        }
+        slot[idx].push_back({w, 1});
+        sz++;
+        if ((double)sz / m > 0.75) {
+            rehash();
+        }
     }
     int get(const string& w) const {
         // TODO: viet code cua ban o day
+        int idx = hashStr(w, m);
+        for (const auto& kv : slot[idx]) {
+            if (kv.first == w) {
+                return kv.second;
+            }
+        }
         return 0;
     }
     int longestChain() const { size_t L = 0; for (auto& c : slot) L = max(L, c.size()); return L; }
@@ -117,11 +209,44 @@ struct WordCounter {
 // =====================================================================
 long long inversionsBrute(const vector<int>& a) {
     // TODO: viet code cua ban o day
-    return 0;
+    long long count = 0;
+    int n = a.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (a[i] > a[j]) {
+                count++;
+            }
+        }
+    }
+    return count;
 }
 long long sortCount(vector<int>& a, vector<int>& tmp, int lo, int hi) {   // [lo, hi]
     // TODO: viet code cua ban o day
-    return 0;
+    if (lo >= hi) return 0;
+    int mid = lo + (hi - lo) / 2;
+    long long count = 0;
+    count += sortCount(a, tmp, lo, mid);
+    count += sortCount(a, tmp, mid + 1, hi);
+
+    int i = lo, j = mid + 1, k = lo;
+    while (i <= mid && j <= hi) {
+        if (a[i] <= a[j]) {
+            tmp[k++] = a[i++];
+        } else {
+            tmp[k++] = a[j++];
+            count += (mid - i + 1);
+        }
+    }
+    while (i <= mid) {
+        tmp[k++] = a[i++];
+    }
+    while (j <= hi) {
+        tmp[k++] = a[j++];
+    }
+    for (int p = lo; p <= hi; p++) {
+        a[p] = tmp[p];
+    }
+    return count;
 }
 long long inversionsMerge(vector<int> a) {
     vector<int> tmp(a.size());
@@ -134,7 +259,19 @@ long long inversionsMerge(vector<int> a) {
 // =====================================================================
 int quickSelect(vector<int> a, int k) {
     // TODO: viet code cua ban o day
-    return 0;
+    int lo = 0, hi = (int)a.size() - 1;
+    int target = k - 1;
+    while (lo <= hi) {
+        if (lo == hi) return a[lo];
+        if (hi - lo >= 2) {
+            medianOfThree(a, lo, hi);
+        }
+        int p = lomuto(a, lo, hi);
+        if (p == target) return a[p];
+        if (p < target) lo = p + 1;
+        else hi = p - 1;
+    }
+    return a[target];
 }
 
 // =====================================================================

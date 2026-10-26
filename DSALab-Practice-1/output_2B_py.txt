@@ -1,0 +1,33 @@
+===== 2B.1: Radix sort =====
+  exp=1: 720 355 436 457 657 329 839
+  exp=10: 720 329 436 839 355 457 657
+  exp=100: 329 355 436 457 657 720 839
+n = 100000: 172.269 ms  [OK]
+
+===== 2B.2: Noi suy vs Nhi phan (probe trung binh / 1000 truy van) =====
+deu   a[i]=10(i+1),  n=1e6:  binary 18.950   interpolation 1.000  [OK]
+lech  a[i]=(i+1)^3,  n=1000:  binary 9.026   interpolation 22.347  [OK]
+
+===== 2B.3: Quick sort - pivot cuoi vs trung vi cua ba =====
+                  pivot cuoi    trung vi 3
+    ngau nhien         12116         10105  [OK]
+        da sap        499500          7988  [OK]
+      sap giam        496666         14208  [OK]
+
+===== 2B.4: Bang bam dem tu =====
+Tong so tu = 75, so tu khac nhau = 45, m = 63, so lan rehash = 3, alpha = 0.714, chuoi dai nhat = 4
+Top 5:  the=11  and=6  a=5  table=4  dog=3
+get("fox") = 3, get("cat") = 0, h("fox", 7) = 6
+
+===== 2B.5: Dem nghich the =====
+2 4 1 3 5 -> 3 nghich the
+n = 3000: brute = 2209239, merge = 2209239  [OK]
+n = 200 000: 10000845511 nghich the, 515.706 ms (brute se mat ~ vai phut)
+
+===== 2B.6: Quickselect =====
+  k =      1 -> 19
+  k =     10 -> 108
+  k =  50001 -> 499654
+  k =  99999 -> 999982
+  k = 100001 -> 1000000
+Trung vi cua 100001 so = 499654  [OK]

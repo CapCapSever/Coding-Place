@@ -42,6 +42,10 @@ template <class F> double timeMs(F f) {
 long long comps = 0;
 int linearSearch(const vector<int>& a, int x) {
     // TODO: viet code cua ban o day
+    for (int i = 0; i < (int)a.size(); i++) {
+        comps++;
+        if (a[i] == x) return i;
+    }
     return -1;
 }
 
@@ -58,11 +62,28 @@ int linearSearch(const vector<int>& a, int x) {
 long long mults = 0;
 long long powNaive(long long b, long long e, long long m) {
     // TODO: viet code cua ban o day
-    return 0;
+    long long res = 1 % m;
+    b %= m;
+    for (long long i = 0; i < e; i++) {
+        res = (res * b) % m;
+        mults++;
+    }
+    return res;
 }
 long long powFast(long long b, long long e, long long m) {
     // TODO: viet code cua ban o day
-    return 0;
+    long long res = 1 % m;
+    b %= m;
+    while (e > 0) {
+        if (e % 2 == 1) {
+            res = (res * b) % m;
+            mults++;
+        }
+        b = (b * b) % m;
+        mults++;
+        e /= 2;
+    }
+    return res;
 }
 
 // =====================================================================
@@ -74,16 +95,31 @@ long long powFast(long long b, long long e, long long m) {
 long long calls = 0;
 long long fibRec(int n) {
     // TODO: viet code cua ban o day
-    return 0;
+    calls++;
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    return fibRec(n - 1) + fibRec(n - 2);
 }
 long long fibMemoHelper(int n, vector<long long>& memo) {
     // TODO: viet code cua ban o day
-    return 0;
+    calls++;
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    if (memo[n] != -1) return memo[n];
+    return memo[n] = fibMemoHelper(n - 1, memo) + fibMemoHelper(n - 2, memo);
 }
 long long fibMemo(int n) { vector<long long> memo(n + 1, -1); return fibMemoHelper(n, memo); }
 long long fibIter(int n) {
     // TODO: viet code cua ban o day
-    return 0;
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    long long prev2 = 0, prev1 = 1;
+    for (int i = 2; i <= n; i++) {
+        long long cur = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = cur;
+    }
+    return prev1;
 }
 
 // =====================================================================
@@ -95,15 +131,56 @@ long long fibIter(int n) {
 // =====================================================================
 long long threeSumCubic(const vector<int>& a) {
     // TODO: viet code cua ban o day
-    return 0;
+    long long count = 0;
+    int n = a.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            for (int k = j + 1; k < n; k++) {
+                if (a[i] + a[j] + a[k] == 0) {
+                    count++;
+                }
+            }
+        }
+    }
+    return count;
 }
 long long threeSumBinary(vector<int> a) {
     // TODO: viet code cua ban o day
-    return 0;
+    sort(a.begin(), a.end());
+    long long count = 0;
+    int n = a.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            int target = -(a[i] + a[j]);
+            if (binary_search(a.begin() + j + 1, a.end(), target)) {
+                count++;
+            }
+        }
+    }
+    return count;
 }
 long long threeSumTwoPtr(vector<int> a) {
     // TODO: viet code cua ban o day
-    return 0;
+    sort(a.begin(), a.end());
+    long long count = 0;
+    int n = a.size();
+    for (int i = 0; i < n; i++) {
+        int target = -a[i];
+        int left = i + 1, right = n - 1;
+        while (left < right) {
+            int sum = a[left] + a[right];
+            if (sum == target) {
+                count++;
+                left++;
+                right--;
+            } else if (sum < target) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+    }
+    return count;
 }
 // Sinh n so nguyen doi mot khac nhau trong [-10n, 10n] (da cho san)
 vector<int> distinctData(int n, unsigned long long seed) {

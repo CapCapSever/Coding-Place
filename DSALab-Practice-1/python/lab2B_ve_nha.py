@@ -37,13 +37,33 @@ def show(a):
 def counting_by_digit(a, exp):
     """Sap xep ON DINH mang a theo chu so (a[i] // exp) % 10; tra ve mang moi."""
     # TODO: viet code cua ban o day
-    return a
+    n = len(a)
+    out = [0] * n
+    count = [0] * 10
+    for x in a:
+        digit = (x // exp) % 10
+        count[digit] += 1
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+    for i in range(n - 1, -1, -1):
+        digit = (a[i] // exp) % 10
+        count[digit] -= 1
+        out[count[digit]] = a[i]
+    return out
 
 
 def radix_sort(a, trace):
     """Sap xep TAI CHO mang a (gan lai a[:] = ...)."""
     # TODO: viet code cua ban o day
-    pass
+    if not a:
+        return
+    mx = max(a)
+    exp = 1
+    while mx // exp > 0:
+        a[:] = counting_by_digit(a, exp)
+        if trace:
+            print(f"  exp={exp}: {show(a)}")
+        exp *= 10
 
 
 # =====================================================================
@@ -55,12 +75,37 @@ probes = 0
 def binary_search(a, x):
     global probes
     # TODO: viet code cua ban o day
+    lo, hi = 0, len(a) - 1
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2
+        probes += 1
+        if a[mid] == x:
+            return mid
+        if a[mid] < x:
+            lo = mid + 1
+        else:
+            hi = mid - 1
     return -1
 
 
 def interpolation_search(a, x):
     global probes
     # TODO: viet code cua ban o day
+    lo, hi = 0, len(a) - 1
+    while lo <= hi and a[lo] <= x <= a[hi]:
+        if a[lo] == a[hi]:
+            probes += 1
+            if a[lo] == x:
+                return lo
+            return -1
+        pos = lo + (x - a[lo]) * (hi - lo) // (a[hi] - a[lo])
+        probes += 1
+        if a[pos] == x:
+            return pos
+        if a[pos] < x:
+            lo = pos + 1
+        else:
+            hi = pos - 1
     return -1
 
 
@@ -92,12 +137,27 @@ def quick_sort_last(a, lo, hi):          # ban goc (da cho san)
 
 def median_of_three(a, lo, hi):
     # TODO: viet code cua ban o day
-    pass
+    if hi - lo < 2:
+        return
+    mid = lo + (hi - lo) // 2
+    if a[lo] > a[mid]:
+        a[lo], a[mid] = a[mid], a[lo]
+    if a[lo] > a[hi]:
+        a[lo], a[hi] = a[hi], a[lo]
+    if a[mid] > a[hi]:
+        a[mid], a[hi] = a[hi], a[mid]
+    a[mid], a[hi] = a[hi], a[mid]
 
 
 def quick_sort_med3(a, lo, hi):
     # TODO: viet code cua ban o day
-    pass
+    if lo >= hi:
+        return
+    if hi - lo >= 2:
+        median_of_three(a, lo, hi)
+    p = lomuto(a, lo, hi)
+    quick_sort_med3(a, lo, p - 1)
+    quick_sort_med3(a, p + 1, hi)
 
 
 # =====================================================================
@@ -113,18 +173,41 @@ class WordCounter:
     @staticmethod
     def hash_str(s, m):
         # TODO: viet code cua ban o day
-        return 0
+        h = 0
+        for c in s:
+            h = (h * 31 + ord(c)) % m
+        return h
 
     def rehash(self):
         # TODO: viet code cua ban o day
-        pass
+        self.rehashes += 1
+        new_m = 2 * self.m + 1
+        new_slot = [[] for _ in range(new_m)]
+        for chain in self.slot:
+            for w, cnt in chain:
+                idx = self.hash_str(w, new_m)
+                new_slot[idx].append([w, cnt])
+        self.m = new_m
+        self.slot = new_slot
 
     def add(self, w):
         # TODO: viet code cua ban o day
-        pass
+        idx = self.hash_str(w, self.m)
+        for item in self.slot[idx]:
+            if item[0] == w:
+                item[1] += 1
+                return
+        self.slot[idx].append([w, 1])
+        self.sz += 1
+        if self.sz / self.m > 0.75:
+            self.rehash()
 
     def get(self, w):
         # TODO: viet code cua ban o day
+        idx = self.hash_str(w, self.m)
+        for item in self.slot[idx]:
+            if item[0] == w:
+                return item[1]
         return 0
 
     def longest_chain(self):
@@ -136,13 +219,39 @@ class WordCounter:
 # =====================================================================
 def inversions_brute(a):
     # TODO: viet code cua ban o day
-    return 0
+    inv = 0
+    n = len(a)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if a[i] > a[j]:
+                inv += 1
+    return inv
 
 
 def sort_count(a):
     """Tra ve (mang da sap, so nghich the) bang merge sort."""
     # TODO: viet code cua ban o day
-    return (sorted(a), 0)
+    n = len(a)
+    if n <= 1:
+        return a, 0
+    mid = n // 2
+    left, left_inv = sort_count(a[:mid])
+    right, right_inv = sort_count(a[mid:])
+    merged = []
+    inv = left_inv + right_inv
+    i = j = 0
+    len_l, len_r = len(left), len(right)
+    while i < len_l and j < len_r:
+        if left[i] <= right[j]:
+            merged.append(left[i])
+            i += 1
+        else:
+            merged.append(right[j])
+            inv += len_l - i
+            j += 1
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+    return merged, inv
 
 
 def inversions_merge(a):
@@ -154,7 +263,22 @@ def inversions_merge(a):
 # =====================================================================
 def quick_select(a, k):
     # TODO: viet code cua ban o day
-    return 0
+    a = list(a)
+    lo, hi = 0, len(a) - 1
+    target = k - 1
+    while lo <= hi:
+        if lo == hi:
+            return a[lo]
+        if hi - lo >= 2:
+            median_of_three(a, lo, hi)
+        p = lomuto(a, lo, hi)
+        if p == target:
+            return a[p]
+        if p < target:
+            lo = p + 1
+        else:
+            hi = p - 1
+    return a[target]
 
 
 def main():

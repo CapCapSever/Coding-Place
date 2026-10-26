@@ -1,0 +1,265 @@
+================================================================================
+          HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG - CƠ SỞ TP.HCM
+                       KHOA CÔNG NGHỆ THÔNG TIN 2
+                MÔN: CẤU TRÚC DỮ LIỆU VÀ GIẢI THUẬT (INT1306_CLC)
+                     PHIẾU BÁO CÁO THỰC HÀNH - BUỔI 1
+                             (LAB 1A & LAB 2A)
+================================================================================
+
+THÔNG TIN SINH VIÊN:
+- Họ và tên: ....................................................
+- Mã số sinh viên (MSSV): ........................................
+- Lớp: ..........................................................
+- Ngôn ngữ thực hành: C++17 / Python 3
+
+================================================================================
+            PHẦN 1. LAB 1A - ĐẶC TẢ THUẬT TOÁN VÀ ĐỘ PHỨC TẠP
+================================================================================
+
+--------------------------------------------------------------------------------
+Bài 1.1. Giải phương trình bậc hai ax^2 + bx + c = 0
+--------------------------------------------------------------------------------
+Câu 1.1-1: Vì sao test (1, 0.2, 0.01) cho kết quả sai nếu viết if (delta == 0)?
+           Hãy in giá trị delta ra để kiểm chứng.
+Trả lời:
+- Do chuẩn biểu diễn số thực dấu phẩy động IEEE 754 trên máy tính không thể
+  biểu diễn chính xác tuyệt đối các số thập phân như 0.2 hay 0.01 dưới dạng nhị phân.
+- Khi tính delta = b*b - 4*a*c với a = 1, b = 0.2, c = 0.01:
+  Giá trị thực tế là: delta ≈ 6.938893903907228e-18 != 0.
+- Do delta mang một giá trị cực nhỏ khác 0, phép so sánh `delta == 0` sẽ trả về
+  `false`, khiến chương trình nhảy vào nhánh hai nghiệm phân biệt thay vì nghiệm kép.
+- Khắc phục: Phải dùng ngưỡng sai số EPS (ví dụ 1e-9) để so sánh: `abs(delta) <= EPS`.
+
+Câu 1.1-2: Thuật toán trong slide (chỉ xét a != 0) vi phạm tính chất nào của
+           thuật toán khi người dùng nhập a = 0? Bản của bạn đã khắc phục ra sao?
+Trả lời:
+- Vi phạm:
+  + Tính tổng quát (Generality): Thuật toán không xử lý được đầy đủ toàn bộ tập
+    dữ liệu đầu vào hợp lệ của bài toán (tập các số thực R).
+  + Tính đúng đắn (Correctness): Dẫn đến lỗi chia cho 0 (division by zero) khi
+    thực hiện phép chia x = (-b ± sqrt(delta)) / (2*a).
+- Khắc phục:
+  Trước khi tính delta, kiểm tra điều kiện nếu abs(a) <= EPS thì chuyển sang giải
+  phương trình bậc nhất bx + c = 0:
+  + Nếu abs(b) <= EPS:
+      * Nếu abs(c) <= EPS: Phương trình vô số nghiệm (count = -1).
+      * Ngược lại: Phương trình vô nghiệm (count = 0).
+  + Nếu abs(b) > EPS: Phương trình có 1 nghiệm duy nhất x1 = x2 = -c/b (count = 1).
+
+--------------------------------------------------------------------------------
+Bài 1.2. Đếm số phép toán cơ bản
+--------------------------------------------------------------------------------
+Câu 1.2-1: Viết lớp Big-O của F1...F5.
+Trả lời:
+- F1: T(n) = n                        => O(n)         (Tuyến tính)
+- F2: T(n) = n^2                      => O(n^2)       (Bậc hai)
+- F3: T(n) = n*(n - 1) / 2            => O(n^2)       (Bậc hai)
+- F4: T(n) = ceil(log2(n))            => O(log n)     (Logarithm)
+- F5: T(n) = n * ceil(log2(n))        => O(n log n)   (Linearithmic)
+
+Câu 1.2-2: F3 chỉ bằng khoảng một nửa F2. Tại sao hai đoạn vẫn cùng lớp O(n^2)?
+           Liên hệ với định nghĩa Big-O (hằng số C và K).
+Trả lời:
+- Theo định nghĩa Big-O: f(n) thuộc O(g(n)) nếu tồn tại hằng số dương C và n0
+  sao cho với mọi n >= n0: |f(n)| <= C * |g(n)|.
+- Với F3: f(n) = n*(n - 1)/2 = (1/2)*n^2 - (1/2)*n < (1/2)*n^2.
+  Ta chỉ cần chọn C = 1 và n0 = 1, thì luôn có f(n) <= 1 * n^2 với mọi n >= 1.
+- Ký hiệu Big-O loại bỏ các hằng số nhân và các số hạng bậc thấp hơn vì khi n
+  tiến ra vô cùng (n -> inf), tốc độ tăng trưởng của F2 và F3 đều bị chi phối
+  bởi bậc cao nhất là n^2.
+
+Câu 1.2-3: Vì sao F4 với n = 1000 cho kết quả 10 mà không phải log2(1000) ≈ 9.97?
+Trả lời:
+- Biến i khởi tạo từ 1 và nhân đôi sau mỗi bước: 1, 2, 4, 8, ..., 512, 1024.
+- Tại bước lặp thứ 9: i = 2^9 = 512 < 1000, điều kiện lặp vẫn thỏa mãn nên vòng lặp
+  chạy tiếp bước thứ 10 để nhân i lên 1024.
+- Khi i = 1024 >= 1000, vòng lặp mới dừng lại.
+- Vì số lần lặp bắt buộc là số nguyên và thuật toán chỉ dừng khi 2^k >= n, số bước
+  lặp thực tế chính là hàm trần: k = ceil(log2(1000)) = ceil(9.9657) = 10.
+
+--------------------------------------------------------------------------------
+Bài 1.3. Thực nghiệm nhân đôi n (doubling experiment)
+--------------------------------------------------------------------------------
+Câu 1.3-1: Điền bảng thời gian đo được trên máy bạn và kết luận bậc của A, B, C.
+Trả lời:
+* Bảng thời gian đo thực tế trên máy (từ kết quả chạy thực tế):
+  +---------------------------------------------------------------------------------------+
+  |    n   |  Số cặp (A)  |    A (ms)   |   tiA   |   B (ms)  |   tiB   |   C (ms)  |   tiC   |
+  +--------+--------------+-------------+---------+-----------+---------+-----------+---------+
+  |  2000  |    1999000   |    59.1000  |  0.0000 |   0.5503  |  0.0000 |   1.5250  |  0.0000 |
+  |  4000  |    7998000   |   101.4447  |  1.7165 |   0.7371  |  1.3394 |   0.9384  |  0.6153 |
+  |  8000  |   31996000   |   273.5723  |  2.6968 |   1.3494  |  1.8307 |   1.9821  |  2.1122 |
+  | 16000  |  127992000   |  1219.2377  |  4.4567 |   3.0224  |  2.2398 |   4.9249  |  2.4847 |
+  +---------------------------------------------------------------------------------------+
+- Kết luận bậc độ phức tạp:
+  + Cách A (vét cạn):           tiA tiến dần tới ≈ 4.46 (≈ 4)  => O(n^2)
+  + Cách B (sắp xếp + so sánh): tiB tiến dần tới ≈ 2.24 (≈ 2.1) => O(n log n)
+  + Cách C (tập băm hash set):  tiC tiến dần tới ≈ 2.48 (≈ 2.0) => O(n)
+
+Câu 1.3-2: Dùng bảng, ước lượng thời gian của cách A khi n = 1 000 000. Nêu cách tính.
+Trả lời:
+- Cách tính: Vì A có độ phức tạp O(n^2), thời gian chạy tỉ lệ thuận với n^2:
+  T(n2) = T(n1) * (n2 / n1)^2.
+- Lấy mốc n1 = 16 000 có T(16 000) = 1219.2377 ms ≈ 1.2192 giây.
+  Với n2 = 1 000 000: Tỉ số kích thước n2 / n1 = 1 000 000 / 16 000 = 62.5.
+- Thời gian ước lượng:
+  T(1 000 000) ≈ 1219.2377 * (62.5)^2
+               ≈ 1219.2377 * 3906.25
+               ≈ 4 762 647 ms
+               ≈ 4762.65 giây (khoảng 79.38 phút ≈ 1.32 giờ).
+
+Câu 1.3-3: Vì sao chương trình dùng dữ liệu không có phần tử trùng? Nếu dữ liệu
+           có phần tử trùng ngay đầu mảng thì thời gian A thay đổi thế nào?
+Trả lời:
+- Chương trình dùng mảng hoán vị (không trùng) để kiểm tra trường hợp xấu nhất
+  (Worst-case): vòng lặp buộc phải duyệt qua đủ tất cả n*(n - 1)/2 cặp, giúp đo
+  đạc phản ánh chính xác nhất hàm tiệm cận O(n^2).
+- Nếu có phần tử trùng ngay đầu mảng (ví dụ a[0] == a[1]):
+  Thuật toán A sẽ phát hiện trùng ngay ở lần so sánh đầu tiên và lập tức trả về
+  True. Khi đó thuật toán rơi vào trường hợp tốt nhất (Best-case) với O(1), thời
+  gian chạy giảm xuống xấp xỉ 0 ms.
+
+Câu 1.3-4: Trường hợp xấu nhất của cách C là gì? Khi nào bảng băm mất O(1)?
+Trả lời:
+- Trường hợp xấu nhất: Tất cả n phần tử đều bị đụng độ (collision) vào cùng 1 ô
+  (bucket) trong bảng băm.
+- Bảng băm mất O(1) khi: Hàm băm phân bố kém hoặc kích thước bảng quá nhỏ, khiến
+  bảng bị suy biến thành danh sách liên kết có độ dài n (với chaining) hoặc phải
+  duyệt tuyến tính toàn bộ mảng (với linear probing). Khi đó chi phí tìm kiếm mỗi
+  phần tử tăng từ O(1) lên O(n), kéo theo tổng thời gian thuật toán tăng lên O(n^2).
+
+
+================================================================================
+             PHẦN 2. LAB 2A - SẮP XẾP VÀ TÌM KIẾM
+================================================================================
+
+--------------------------------------------------------------------------------
+Bài 2.1. Selection, Insertion, Bubble sort có bộ đếm
+--------------------------------------------------------------------------------
+Câu 2.1-1: Vì sao Selection có cùng số phép so sánh trên dữ liệu đã sắp và sắp ngược?
+Trả lời:
+- Vì Selection sort không có cơ chế kiểm tra sớm hay cờ dừng; ở mỗi lượt i, nó luôn
+  bắt buộc phải duyệt qua toàn bộ các phần tử còn lại từ j = i + 1 đến n - 1 để tìm
+  phần tử nhỏ nhất.
+- Do đó, dù dữ liệu đã sắp tăng dần hay giảm dần, 2 vòng lặp vẫn thực hiện đủ:
+  Sum_{i=0..n-2} (n - 1 - i) = n*(n - 1)/2 = 1000 * 999 / 2 = 499 500 phép so sánh.
+
+Câu 2.1-2: Trên dữ liệu ngẫu nhiên, moves của Insertion bằng đúng số swap của Bubble.
+           Giải thích bằng khái niệm nghịch thế (cặp i < j mà a[i] > a[j]).
+Trả lời:
+- Một nghịch thế là một cặp chỉ số (i, j) mà i < j nhưng a[i] > a[j].
+- Trong Bubble sort: Mỗi lần swap hai phần tử cạnh nhau triệt tiêu đúng 1 nghịch thế.
+  Do đó số lần swap của Bubble sort bằng đúng tổng số nghịch thế của mảng.
+- Trong Insertion sort: Khi chèn key, mỗi lần dịch phần tử a[j+1] = a[j] (với
+  a[j] > key) đưa key vượt qua một phần tử lớn hơn nó cũng triệt tiêu đúng 1 nghịch thế.
+  Do đó số lần dịch (moves) của Insertion sort cũng bằng đúng tổng số nghịch thế.
+- Vì cùng triệt tiêu một lượng nghịch thế ban đầu như nhau, nên số moves của
+  Insertion sort bằng đúng số swap của Bubble sort.
+
+Câu 2.1-3: Thuật toán nào là thích nghi (adaptive)? Dẫn chứng bằng cột "đã sắp tăng".
+Trả lời:
+- Thuật toán thích nghi là Insertion sort và Bubble sort.
+- Dẫn chứng cột "đã sắp tăng" (n = 1000):
+  + Insertion sort: Số so sánh giảm mạnh từ 246 746 (ngẫu nhiên) xuống chỉ còn 999
+    (n - 1 phép so sánh), moves = 0, đạt độ phức tạp O(n).
+  + Bubble sort: Nhờ cờ swapped, vòng lặp dừng ngay sau lượt đầu tiên, số so sánh
+    giảm từ 497 420 xuống còn 999, moves = 0, đạt độ phức tạp O(n).
+  + Trong khi đó, Selection sort không thích nghi vì số so sánh vẫn giữ nguyên là
+    499 500 (O(n^2)).
+
+Câu 2.1-4: Khi nào nên chọn Selection sort dù nó chậm?
+Trả lời:
+- Nên chọn Selection sort khi chi phí ghi / đổi chỗ phần tử vào bộ nhớ (write / swap)
+  rất đắt đỏ so với chi phí đọc / so sánh.
+- Ví dụ:
+  + Bộ nhớ Flash hoặc EEPROM (nơi số lần ghi bị giới hạn phần cứng của chip).
+  + Các phần tử có dung lượng dữ liệu rất lớn trong RAM mà việc di chuyển/copy
+    tốn kém tài nguyên.
+  Selection sort đảm bảo số lần swap tối đa chỉ là n - 1 lần (O(n) moves), ít hơn
+  rất nhiều so với O(n^2) moves của Bubble hay Insertion sort.
+
+--------------------------------------------------------------------------------
+Bài 2.2. Quick sort (Lomuto) và Merge sort
+--------------------------------------------------------------------------------
+Câu 2.2-1: Vì sao quick sort trên mảng đã sắp cần đúng n(n-1)/2 = 499 500 phép so sánh?
+           Viết hệ thức truy hồi.
+Trả lời:
+- Khi dùng phân hoạch Lomuto chọn pivot ở cuối (pivot = a[hi]), trên mảng đã sắp
+  tăng, pivot luôn là phần tử lớn nhất. Khi đó toàn bộ phần tử trước nó đều thỏa
+  a[j] <= pivot.
+- Vị trí phân hoạch luôn rơi vào cuối mảng (p = hi). Mảng bị chia lệch cực đại thành
+  2 đoạn có kích thước n - 1 và 0.
+- Hệ thức truy hồi:
+  T(n) = T(n - 1) + (n - 1),  với T(1) = 0.
+- Khai triển:
+  T(n) = (n - 1) + (n - 2) + ... + 1 = n*(n - 1)/2 = 1000 * 999 / 2 = 499 500 phép so sánh.
+
+Câu 2.2-2: Merge sort trên mảng đã sắp chỉ cần 5044 phép so sánh, ít hơn trên mảng
+           ngẫu nhiên. Vì sao?
+Trả lời:
+- Khi gộp hai nửa A (trái) và B (phải) vốn đã được sắp tăng, toàn bộ phần tử của
+  nửa trái đều nhỏ hơn hoặc bằng phần tử đầu của nửa phải.
+- Vòng lặp so sánh đưa toàn bộ nửa trái vào mảng tạm và dừng ngay lập tức khi nửa
+  trái hết (i > mid), không cần so sánh thêm phần tử nào của nửa phải.
+- Số phép so sánh ở mỗi lần merge chỉ là len/2 thay vì len - 1, đưa tổng số phép
+  so sánh về trường hợp tốt nhất (Best-case) ≈ (n/2) * log2(n) ≈ 5044.
+
+Câu 2.2-3: Ghi thời gian ba thuật toán với N lớn. Vì sao std::sort / sorted() nhanh
+           hơn bản tự viết?
+Trả lời:
+- Số liệu đo thực tế với N = 1 000 000 ngẫu nhiên (từ kết quả chạy thực tế trên máy):
+  + Quick sort tự viết: 737.02 ms
+  + Merge sort tự viết: 1126.19 ms
+  + std::sort:          314.07 ms
+- Nguyên nhân std::sort / sorted() nhanh hơn:
+  1. Thuật toán lai tối ưu (Introsort / Timsort): Kết hợp Quick sort (tốc độ cao),
+     Heap sort (tránh O(n^2) khi đệ quy quá sâu), và Insertion sort (cho các mảng con <= 16).
+  2. Tối ưu bộ nhớ đệm (Cache locality): std::sort sắp xếp tại chỗ hoàn toàn (in-place),
+     không tốn chi phí cấp phát và giải phóng mảng phụ trên Heap như Merge sort.
+  3. Tối ưu trình biên dịch: Thư viện chuẩn được viết bằng template nội tuyến (inline),
+     tận dụng tối đa thanh ghi và kỹ thuật mở vòng lặp (loop unrolling) của CPU.
+
+--------------------------------------------------------------------------------
+Bài 2.3. Tìm kiếm nhị phân có vết và bảng băm
+--------------------------------------------------------------------------------
+Câu 2.3-1: Tìm kiếm nhị phân trên mảng 10 phần tử cần tối đa bao nhiêu bước?
+           So với công thức floor(log2(n)) + 1.
+Trả lời:
+- Theo công thức số bước tối đa trong trường hợp xấu nhất:
+  floor(log2(10)) + 1 = 3 + 1 = 4 bước.
+- Kiểm chứng thực tế: Khi tìm phần tử không có (x = 4) hoặc phần tử biên (x = 91),
+  hàm binarySearchTrace chạy đúng 4 bước (step 1 đến step 4), hoàn toàn khớp công thức.
+
+Câu 2.3-2: Bộ khóa thứ nhất có đụng độ không? Tính hệ số tải alpha.
+Trả lời:
+- Bộ khóa 1: {12, 25, 35, 26, 5} với m = 11:
+  12 mod 11 = 1; 25 mod 11 = 3; 35 mod 11 = 2; 26 mod 11 = 4; 5 mod 11 = 5.
+  Các chỉ số băm đôi một khác nhau (1, 3, 2, 4, 5) => Không có đụng độ.
+- Hệ số tải: alpha = n / m = 5 / 11 ≈ 0.455.
+
+Câu 2.3-3: Với bộ khóa thứ hai, tìm khóa 23 (không có) mất bao nhiêu probe ở mỗi cách?
+           Giải thích hiện tượng gom cụm sơ cấp (primary clustering).
+Trả lời:
+- Với bộ khóa 2: {22, 33, 44, 1, 12}, m = 11. Tìm khóa x = 23 (23 mod 11 = 1):
+  + Chaining: Tìm tại slot 1 (chứa chuỗi 12 -> 1), duyệt 2 phần tử và hết chuỗi => 2 probe.
+  + Linear Probing: Bắt đầu tại slot 1, phải duyệt qua các ô liên tiếp đã bị chiếm:
+    slot 1 (33), slot 2 (44), slot 3 (1), slot 4 (12), và chỉ dừng khi gặp ô trống ở
+    slot 5 => 5 probe.
+- Hiện tượng gom cụm sơ cấp (Primary clustering):
+  Xảy ra trong Linear Probing khi các phần tử bị đụng độ chiếm các ô kề nhau tạo thành
+  một dải ô liên tục bị chiếm (từ slot 0 đến slot 4). Bất kỳ khóa mới nào có giá trị
+  băm rơi vào dải này đều phải dò qua hết toàn bộ dải mới tìm được ô trống tiếp theo,
+  khiến dải ngày càng dài ra và làm số lần thăm dò (probe) tăng vọt.
+
+Câu 2.3-4: Vì sao nên chọn m là số nguyên tố?
+Trả lời:
+- Khi dùng hàm băm chia h(k) = k mod m, nếu m là hợp số (đặc biệt là lũy thừa của 2
+  như 2^p), giá trị băm sẽ chỉ phụ thuộc vào p bit cuối của khóa k. Nếu dữ liệu có
+  quy luật (ví dụ cùng là số chẵn), các khóa sẽ chỉ rơi vào một số ít ô chẵn, gây
+  đụng độ nghiêm trọng.
+- Chọn m là số nguyên tố giúp loại bỏ việc chia sẻ ước số chung giữa m và quy luật
+  của dữ liệu, phân bố đều các giá trị băm trên toàn bộ dải từ 0 đến m - 1.
+
+================================================================================
+                                HẾT BÁO CÁO
+================================================================================
